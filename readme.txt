@@ -1,0 +1,2 @@
+- code.py is for html rendering. 
+- product_api.py is an abstract layer for data access. 
