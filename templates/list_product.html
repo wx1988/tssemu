@@ -1,34 +1,146 @@
 <div class="container">
-  <div class="row">
-  	feedback on selection
-  </div>
 
   <div class="row">
+		  </div>
+
+  <div class="row">
 
     <div class="col-sm-3">
-      Faceted data filtering
+			<!-- faceted data -->
+			<div class="panel-group">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" href="#collapse1">Manufacturer</a>
+						</h4>
+
+						<div id="collapse1" class="panel-collapse collapse">
+							<div class="panel-body">
+
+								Panel Body
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
     </div>
 
-    <div class="col-sm-3">
-      First column
-      <div style="height:200px;">
-        <a href="">
-          <img src=""/>
-          <div>
-            Info
-          </div>
-        </a>
-      </div>
-    </div>
+		<div class="col-sm-9">
+			<div class="row">
+				<div class="input-group">
+					<!--<div class="form-control tag-input">-->
+					<div class="tag-input">
+						<ul>
+							<li>
+								<span class="label label-default">
+									DDR3
+									<button type="button" class="close" data-dismiss="li">
+										<span aria-hidden="true">&times;</span>
+										<span class="sr-only">Close</span>
+									</button>
+								</span>
+							</li>
 
-    <div class="col-sm-3">
-      Second column
-    </div>
+							<li>
+								<span class="label label-default">
+									1066Hz
+									<button type="button" class="close" data-dismiss="li">
+										<span aria-hidden="true">&times;</span>
+										<span class="sr-only">Close</span>
+									</button>
+								</span>
+							</li>
 
-    <div class="col-sm-3">
-      Third column
-    </div>
+							<li>
+								<span class="label label-default">
+									ECC
+									<button type="button" class="close" data-dismiss="li">
+										<span aria-hidden="true">&times;</span>
+										<span class="sr-only">Close</span>
+									</button>
+								</span>
+							</li>
 
-  </div>
+							<li>
+								<span class="label label-default">
+									Registered
+									<button type="button" class="close" data-dismiss="li">
+										<span aria-hidden="true">&times;</span>
+										<span class="sr-only">Close</span>
+									</button>
+								</span>
+							</li>
+
+						</ul>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="row">
+				<div class="col-sm-2">
+					<p>4 items</p>
+				</div>
+				<div class="col-sm-2 text-right">
+					<p>Sort By:</p>
+				</div>
+				<div class="col-sm-4">
+					<select class='form-control'>
+						<option> Customer Rating</option>
+						<option> Best Selling </option>
+						<option> Price Low to High </option>
+						<option> Price High to Low </option>
+					</select>
+				</div>
+		</div>
+
+		<div class="row">
+			<div id="prod_list_col_1" class="col-sm-4">
+			</div>
+
+			<div id="prod_list_col_2" class="col-sm-4">
+			</div>
+
+			<div id="prod_list_col_3" class="col-sm-4">
+			</div>
+		</div>
+	</div>
 
 </div>
+
+</div>
+
+<script>
+// get the product list, and show
+function get_prod_cb(data){
+console.log(data);
+var prod_list = data.data;
+for(var i=0; i< 3;i++){
+	var col_str = "";
+	for(var j=0;j < prod_list.length;j++){
+		if( j%3!=i) continue;
+		//var tmp_str = "<div style='height:200px;'>";
+		var tmp_str = "<div>";
+		tmp_str += "<a href='/view_product?id="+prod_list[j].source+"_"+prod_list[j].id+"'>";
+		tmp_str += "<img src='/static/imgs/4dot4.png' width='250px' />";
+		var sellername = prod_list[j].sellername;
+		if(sellername == undefined)
+			sellername = "";
+		else
+			sellername = "-"+sellername;
+		tmp_str += "<p> " + prod_list[j].price + " from "+
+			prod_list[j].source + sellername+"</p>"
+		tmp_str += "</a></div>";
+		col_str += tmp_str;
+	}
+	var div_id = "prod_list_col_"+(i+1);
+	jQuery('#'+div_id).html(col_str);
+}
+}
+
+window.onload = function(){
+jQuery.get("/search_product", get_prod_cb, "json");
+}
+
+</script>

@@ -26,12 +26,30 @@ $def with (content)
 	width: 280px;
 }
 
+/* tag for the feedback on selected specification */
+.tag-input ul {
+	padding-left: 0;
+	display: inline;
+	list-style-type: none;
+}
+.tag-input li {
+	    display: inline-block;
+}
+.tag-input .label {
+	    display: inline-block;
+}
+.tag-input .label button {
+	    margin-top: -5px;
+			    margin-left: 5px;
+}
+
+/* footer property */
 .footer {
   /*position: absolute;*/
   bottom: 0;
   /* Set the fixed height of the footer here */
   height: 40px;
-  background-color: #00A79D;
+  /*background-color: #00A79D;*/
   /*opacity: 0.5;*/
 }
 
@@ -44,32 +62,33 @@ $def with (content)
   		<div id="header">
 <nav class="navbar navbar-default">
   <div class="container-fluid">
+
     <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
+    <div class="navbar-header" style="">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">Memory Upgrading Assistant</a>
+      <a class="navbar-brand" href="#" style="">
+        <strong>
+        Memory Upgrading Assistant
+      </strong>
+      </a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav navbar-right">
-        <li class="active menuli" >
-        	<a href="#">
-        		Auto Detection and Suggest
+        <li class="menuli" >
+        	<a href="#" class="pull-right">
+        		Asistant Toolkit
+        	</a>
+        </li>
+        <li class="menuli" style="background-color: ">
+        	<a href="#" class="text-center">
+        		Upgrading by Computer Model
         	</a>
         </li>
         <li class="menuli">
-        	<a href="#">
-        		Semi-Automatic Selection
-        	</a>
-        </li>
-        <li class="menuli">
-        	<a href="#">
+        	<a href="#" class="pull-left">
         		Manually Selection
         	</a>
         </li>
@@ -80,18 +99,21 @@ $def with (content)
 </nav>
   		</div>
 
-  		<div id="main" style="height:500px;">
+  		<div id="main" style="">
   			$:content
   		</div>
 
   		<footer id="footer" class="footer">
+        <div>
+          <hr/>
+        </div>
   			<div class="container">
   				@Copyright, Xing Wang 2016
   			</div>
-
+        <!--
   			<div>
   				TODO, get the image for facebook and twitter
-  			</div>
+  			</div>-->
 
   		</footer>
 
