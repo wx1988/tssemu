@@ -44,7 +44,7 @@ def download_server_mem():
         time.sleep(time_lag)
 
 if __name__ == "__main__":
-    #download_desktop_mem()
+    download_desktop_mem()
     download_laptop_mem()
     download_mac_mem()
     download_server_mem()

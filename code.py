@@ -7,6 +7,8 @@ urls=(
     '/list_product', 'list_product', 
     '/compare', 'compare_products', # compare two or three products
 
+    # POST service
+    '/suggest', 'suggest', 
 
     # API
     '/search_product', 'search_product',
@@ -39,6 +41,16 @@ class compare_products:
         render = web.template.render('templates/', base="base")
         return render.compare_products()
 
+#############
+# Post page
+#############
+class suggest:
+    def GET(self):
+        """
+        get all compatible products, 
+        group them based on the upgrading 
+        """
+        return ""
 
 #############
 # RESTFUL API
