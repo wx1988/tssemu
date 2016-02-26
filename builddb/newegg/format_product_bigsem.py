@@ -11,7 +11,7 @@ speed_reg = "(DDR\d) (\d+) \((PC\d) (\d+)\)"
 cas_reg = "\d+"
 timing_reg = "\d-\d-\d"
 #timing_reg = "\d-\d-\d", possible with four measure
-volt_reg = "(\d.\d+)V"
+volt_reg = "(\d\.\d+)\s*V"
 ecc_reg = "Yes|No"
 buf_reg = "Buffered|Unbuffered"
 kit_reg = "\w+"
@@ -78,8 +78,9 @@ def format_complete_prod(prod_md):
 
     # TODO, possible two voltage
     if kv.has_key("Voltage"):
-        m = re.search(volt_reg, kv['Voltage'])
-        prod_info['voltage'] = float(m.group(1))
+        m = re.search(volt_reg, kv['Voltage'], re.IGNORECASE)
+        if m:
+            prod_info['voltage'] = float(m.group(1))
 
     #print prod_info
     return prod_info

@@ -63,6 +63,7 @@ def check():
         "N82E16820231733.json",
         "N82E16820231466.json",
         # pc100, # pc2100
+        "9SIA70F3H87330.json"
         "9SIA70F3H87385.json",
         "9SIA4UB3TD3552.json",
         "9SIA70F3HT7634.json",
@@ -81,17 +82,59 @@ def check():
         "9SIA7S62VZ7633.json",
         "9SIA86Y3P66842.json",
         "9SIA7S62VZ7584.json",
+        "9SIA5752CZ1519.json",
+        "N82E16820516309.json",
+        "9SIA67S3T49574.json",
+        "9SIA8BU3PC9858.json",
+        "9SIA70F3HT7740.json",
+        "9SIA70F3HT7783.json",
+        "9SIA85V3RB1833.json",
+        "9SIA67S3T48863.json",
+        "9SIAA443S22485.json",
+        "9SIA6ZP3R87639.json",
+        "N82E16820224064.json",
         # unknown type
-        "9SIA85V3R95134.json"]
+        "9SIA85V3R95134.json",
+        "9SIA7S62VZ7944.json",
+        "9SIA67S3T49550.json",
+        "9SIA7S62VZ7611.json",
+        "9SIA70F3H87119.json",
+        "9SIA24G3SW5108.json",
+        # obvious wrong
+        "9SIA5751PV1922.json",
+        "9SIA6UM2C46488.json",
+        "9SIA70F3HT7643.json",
+        "9SIA5753KG5842.json",
+        "9SIA70F3HT7833.json",
+        "9SIA8BU3RA6910.json",
+        "9SIA70F3HT7775.json",
+        # need voting
+        "9SIA24G1GC6355.json",
+        "9SIA70F3H87075.json",
+        "9SIA70F3J47809.json",
+        "9SIA70F3H87159.json",
+        "9SIA70F3H87023.json",
+        "9SIA70F3H87088.json",
+        "9SIA70F3H86931.json",
+        "9SIA8R03U35487.json",
+        "9SIAA443S21648.json",
+        "9SIA70F3H87016.json",
+        "9SIA70F3H87308.json",
+        "9SIA70F3HT7757.json",
+        ]
     meta_dir = "metadata"
 
+    gc = 0
     bc = 0
+    start_index = 0
     for i, fname in enumerate( os.listdir(meta_dir) ):
         if not fname.endswith("json"):
             continue
         if fname in ignore_list:
             continue
         if fname in todo_list:
+            continue
+        if i < start_index:
             continue
 
         print "##################"
@@ -123,7 +166,8 @@ def check():
             print prod_md_str
             exit(1)
         """
-    print i, bc
+        gc += 1
+    print gc, bc
 
 
 

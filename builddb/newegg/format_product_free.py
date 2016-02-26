@@ -7,6 +7,7 @@ import json
 pc2freq = {
     4: {
         17000:2133,
+        17060:2133,
         19200:2400,
         21300:2666,
         22400:2800,
@@ -16,22 +17,34 @@ pc2freq = {
         26400:3300,
         27200:3400,
         27700:3466,
+        27730:3466,
         28000:3600,
         28800:3600,
+        29800:3733,
         30000:3866,
         30900:3866,
+        32000:4000,
+        33000:4133,
+        33600:4200,
     },
     3:{
         6400:800,
         8500:1066,
         10600:1333,
+        10660:1333,
         10666:1333,
         12800:1600,
         14900:1866,
+        15000:1866,
+        16000:2000,
         17000:2133,
+        17060:2133,
         19200:2400,
+        21300:2666,
         22400:2800,
-        24000:3000
+        23400:2933,
+        24000:3000,
+        24800:3100,
     },
     2:{
         8500:1066,
@@ -43,10 +56,13 @@ pc2freq = {
         3200:400
     },
     1:{
+        100:100,
+        133:133,
         1600:200,
         2100:266,
         2700:333,
         3200:400,
+        3500:433,
         4200:533,
         8500:1066,
     }
@@ -63,9 +79,9 @@ g_size_mb_reg = "(\d+)\s*MB"
 
 g_pc_reg = "PC(\d)[-\s]*(\d+)"
 g_pc1_reg = "PC[-\s]*(\d+)"
-g_pc3l_reg = "PC3L\s*(\d+)"
+g_pc3l_reg = "PC3L[-\s]*(\d+)"
 
-g_volt_reg = "(\d.\d+)V"
+g_volt_reg = "(\d\.\d+)\s*V"
 g_timing_reg = "(\d+)-(\d+)-(\d+)-(\d+)"
 
 def get_capacity(prod_md_str):
@@ -96,6 +112,15 @@ def get_capacity(prod_md_str):
 def get_typefreq(prod_md_str):
     print "in function typefreq", prod_md_str
     prod_info = {}
+    # PC1
+    ddr1_list = ['PC'+str(t) for t in pc2freq[1]]
+    for t in ddr1_list:
+        if prod_md_str.count( t ) > 0:
+            prod_info['type'] = "DDR1"
+            prod_info['freq'] = pc2freq[1][int(t[2:])]
+            return prod_info
+
+    # DDR3L
     m = re.search(g_pc3l_reg , prod_md_str, re.IGNORECASE)
     if m:
         prod_info['type'] = "DDR3"
