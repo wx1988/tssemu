@@ -38,7 +38,15 @@ def check():
         "9SIA6ZP3R86397.json",
         "9SIA86Y3P66595.json",
         "9SIA4HM2B16154.json",
+        # computer based
+        "9SIA70F3H87003.json",
+        "9SIA6ZP3R86331.json",
+        "9SIA86Y3P66828.json",
+        "9SIA86Y3P66954.json",
+        "9SIA70F3H86916.json",
         # wrong information
+        "N82E16820120070.json",
+        "9SIA24G3RH5874.json",
         "9SIA98C3RC7818.json",
         "9SIA85V3R92140.json",
         "9SIA86Y3P66772.json",
@@ -50,7 +58,10 @@ def check():
         "9SIA85V3R91887.json",
         "9SIA8H53HD7613.json",
         "9SIA86Y3P66887.json",
-        "9SIA8H53HD4362.json"
+        "9SIA8H53HD4362.json",
+        "9SIA2E11681062.json",
+        "9SIA8H53HD5924.json"
+
         ]
     todo_list = [
         #  PC3L
@@ -93,6 +104,8 @@ def check():
         "9SIAA443S22485.json",
         "9SIA6ZP3R87639.json",
         "N82E16820224064.json",
+        "9SIA86Y3P66891.json",
+        "9SIA8H53HD4883.json",
         # unknown type
         "9SIA85V3R95134.json",
         "9SIA7S62VZ7944.json",
@@ -100,6 +113,7 @@ def check():
         "9SIA7S62VZ7611.json",
         "9SIA70F3H87119.json",
         "9SIA24G3SW5108.json",
+        "9SIA4UB1UJ9934.json",
         # obvious wrong
         "9SIA5751PV1922.json",
         "9SIA6UM2C46488.json",
@@ -143,6 +157,14 @@ def check():
         prod_md = json.loads(prod_md_str)
         if prod_md_str.lower().count("mushkin") > 0:
             continue
+        computer_models = ['apple','macbook','hp']
+        for_cm = False
+        for cm in computer_models:
+            if prod_md_str.lower().count(cm) > 0:
+                for_cm = True
+                break
+        if for_cm:
+            continue
 
         p1 = format_complete_prod(prod_md)
         ok1 = check_ok(p1)
@@ -158,6 +180,7 @@ def check():
             print p2
             #raise Exception("")
             bc += 1
+            #exit(1)
         """
         except Exception as e:
             print "===================="

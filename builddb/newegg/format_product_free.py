@@ -74,6 +74,7 @@ g_ddrfreq_reg = "DDR\d[-\s]*(\d+)"
 g_pin_reg = "(\d+)[-\s]*Pin"
 
 g_kitsize_reg = "(\d+)\s*[x](\d+)\s*GB"
+g_kitsize_reg2 = "(\d+)GB\s*x\s*(\d+)"
 g_size_reg = "(\d+)\s*GB"
 g_size_mb_reg = "(\d+)\s*MB"
 
@@ -91,6 +92,12 @@ def get_capacity(prod_md_str):
     if m:
         prod_info['capacity'] = int(m.group(2))
         prod_info['number'] = int(m.group(1))
+        return prod_info
+
+    m = re.search(g_kitsize_reg2, prod_md_str, re.IGNORECASE)
+    if m:
+        prod_info['capacity'] = int(m.group(1))
+        prod_info['number'] = int(m.group(2))
         return prod_info
 
     # try to search single memory
