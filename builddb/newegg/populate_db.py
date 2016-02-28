@@ -1,8 +1,15 @@
 import os
+import re
 import json
+import urllib2
+import time
+
 from pymongo import MongoClient
 
-# TODO, connect the db here. write the db configuration in a separate files. 
+from format_product_bigsem import format_complete_prod
+from format_product_free import format_incomplete_prod
+
+# TODO, connect the db here. write the db configuration in a separate files.
 #from consts import MONGO_DB_HOST, MONGO_DB_USER, MONGO_DB_PASSWD
 
 client = MongoClient('localhost', 27017)
@@ -10,18 +17,86 @@ db = client.ram
 newegg_col = db.newegg
 
 def import_ram():
-	ram_md_folder = "metadata"
-	for fname in os.listdir(ram_md_folder):
-		if not fname.endswith("json"):
-			continue
-		obj = json.loads(open("%s/%s"%(ram_md_folder, fname),'r').read())
+    ram_md_folder = "metadata"
+    for fname in os.listdir(ram_md_folder):
+        if not fname.endswith("json"):
+            continue
+        obj = json.loads(open("%s/%s"%(ram_md_folder, fname),'r').read())
 
-		neweggid = fname[:-5]
-		if not newegg_col.find_one({"neweggid": neweggid}):
-			newegg_col.insert({
-				'neweggid':neweggid, 
-				'data': obj })
+        neweggid = fname[:-5]
+        if not newegg_col.find_one({"neweggid": neweggid}):
+            newegg_col.insert({
+                'neweggid':neweggid,
+                'data': obj })
 
+def extract_metadata():
+    def check_ok(prod_info):
+        nece_list = ['type', 'freq', 'capacity']
+        for k in nece_list:
+            if not prod_info.has_key(k):
+                print 'missing', k
+                return False
+        return True
+
+    ram_md_folder = "metadata"
+    for fname in os.listdir(ram_md_folder):
+        if not fname.endswith("json"):
+            continue
+        neweggid = fname[:-5]
+        prod_md_str = open("%s/%s"%(ram_md_folder, fname),'r').read()
+        prod_md = json.loads(prod_md_str)
+        try:
+            p1 = format_complete_prod(prod_md)
+            ok1 = check_ok(p1)
+            if ok1:
+                newegg_col.update(
+                    {'neweggid':neweggid},
+                    {"$set":{'metadata':p1}})
+                continue
+            p2 = format_incomplete_prod(prod_md_str)
+            ok2 = check_ok(p2)
+            if ok2:
+                newegg_col.update(
+                    {'neweggid':neweggid},
+                    {"$set":{'metadata':p2}})
+                continue
+        except Exception as e:
+            print e
+
+def populate_price():
+	from get_price import extract_price
+	neweggid_list = []
+	for ni in newegg_col.find():
+		neweggid_list.append(ni['neweggid'])
+	for ni in neweggid_list:
+		print ni
+		try:
+			price = extract_price(ni)
+			newegg_col.update(
+				{'neweggid':ni},
+				{"$set":{"metadata.price":price}})
+			time.sleep(2)
+		except Exception as e:
+			print e
+
+def try_search():
+    """
+    288,     ddr4,     2133,     4G
+    """
+    pin_v = 288
+    type_v = "DDR4"
+    freq_v = 2133
+    cap_v = 4
+    res = newegg_col.find({
+    	"metadata.pin":pin_v,
+    	"metadata.type":type_v,
+    	"metadata.freq":freq_v,
+    	"metadata.capacity":cap_v})
+    for i in res:
+        print i
 
 if __name__ == "__main__":
-	import_ram()
+    #import_ram()
+    #extract_metadata()
+    #try_search()
+    populate_price()

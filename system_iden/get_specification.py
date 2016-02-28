@@ -1,6 +1,7 @@
 
 import os
 import re
+import json
 import subprocess
 
 def execute_cmd(cmd):
@@ -13,7 +14,9 @@ def execute_cmd(cmd):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
     out, _ = p.communicate()
+    out = out.replace("\r\n", "\n")
     return out
+
 
 def get_memory_str():
     """
@@ -21,6 +24,16 @@ def get_memory_str():
 
     """
     sys_info = {}
+
+    # machine model
+    dmidecode_cmd = ["dmidecode", "-t", "system"]
+    output = execute_cmd(dmidecode_cmd)
+    lines = [line.strip() for line in output.split("\n")]
+    for line in lines:
+        if line.startswith("Manufacturer"):
+            sys_info['manufacturer'] = line[line.index(":")+1:]
+        if line.startswith("Product Name"):
+            sys_info['productname'] = line[line.index(":")+1:]
 
     # some system info
     dmidecode_cmd = ["dmidecode", "-t", "16"]
@@ -37,9 +50,9 @@ def get_memory_str():
     # get existing memories
     dmidecode_cmd = ["dmidecode", "-t", "17"]
     output = execute_cmd( dmidecode_cmd )
-    output = output.replace("\r\n", "\n")
     lines = [line.strip() for line in output.split("\n")]
     #print output
+
 
     # 1. size
     size_re = re.compile("Size: (\d+) MB")
@@ -50,6 +63,7 @@ def get_memory_str():
     speed_re = re.compile("Speed: (\d+) MHz")
     # 4. Part number
     pn_re = re.compile("Part Number: ([\w -/]+)")
+
 
     sys_info['mem_list'] = []
     mem_list = output.split('\n\n')
@@ -77,10 +91,13 @@ def get_memory_str():
                 pass
     return sys_info
 
-
 if __name__ == "__main__":
     sys_info =  get_memory_str()
-
+    print sys_info
     #print sys_info
     # TODO, design the sever part that receive such things
-    os.system("explorer http://%d"%sys_info['maximum_capacity'])
+    url_tpl = "http://rtds9.cse.tamu.edu:8080/suggest?sys_info=%s"
+    print "data",json.dumps(sys_info)
+    the_url = url_tpl%(json.dumps(sys_info))
+    print the_url
+    os.system("explorer %s"%(the_url))

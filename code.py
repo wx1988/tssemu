@@ -4,11 +4,11 @@ urls=(
     # pages
     '/', 'index',
     '/view_product', 'view_product',
-    '/list_product', 'list_product', 
+    '/list_product', 'list_product',
     '/compare', 'compare_products', # compare two or three products
 
     # POST service
-    '/suggest', 'suggest', 
+    '/suggest', 'suggest',
 
     # API
     '/search_product', 'search_product',
@@ -47,10 +47,14 @@ class compare_products:
 class suggest:
     def GET(self):
         """
-        get all compatible products, 
-        group them based on the upgrading 
+        get all compatible products,
+        group them based on the upgrading
         """
-        return ""
+        d = web.input()
+        sys_info = json.loads( d['sys_info'] )
+        print sys_info
+        return sys_info
+
 
 #############
 # RESTFUL API

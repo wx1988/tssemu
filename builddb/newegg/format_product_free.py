@@ -74,7 +74,7 @@ g_ddrfreq_reg = "DDR\d[-\s]*(\d+)"
 g_pin_reg = "(\d+)[-\s]*Pin"
 
 g_kitsize_reg = "(\d+)\s*[x](\d+)\s*GB"
-g_kitsize_reg2 = "(\d+)GB\s*x\s*(\d+)"
+g_kitsize_reg2 = "(\d+)\s*GB\s*x\s*(\d+)"
 g_size_reg = "(\d+)\s*GB"
 g_size_mb_reg = "(\d+)\s*MB"
 
@@ -88,12 +88,14 @@ g_timing_reg = "(\d+)-(\d+)-(\d+)-(\d+)"
 def get_capacity(prod_md_str):
     print "in function get_capacity", prod_md_str
     prod_info ={}
+    # gb kit 1
     m = re.search(g_kitsize_reg, prod_md_str, re.IGNORECASE)
     if m:
         prod_info['capacity'] = int(m.group(2))
         prod_info['number'] = int(m.group(1))
         return prod_info
 
+    # gb kit 2
     m = re.search(g_kitsize_reg2, prod_md_str, re.IGNORECASE)
     if m:
         prod_info['capacity'] = int(m.group(1))
@@ -107,6 +109,7 @@ def get_capacity(prod_md_str):
         prod_info['number'] = 1
         return prod_info
 
+    # search mb size memory
     m = re.search(g_size_mb_reg, prod_md_str, re.IGNORECASE)
     if m:
         prod_info['capacity'] = float(m.group(1))/ 1024
