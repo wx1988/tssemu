@@ -1,3 +1,9 @@
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+db = client.ram
+newegg_col = db.newegg
+
+import os
 import web, json
 
 urls=(
@@ -10,10 +16,43 @@ urls=(
     # POST service
     '/suggest', 'suggest',
 
+    # interactive cralwer
+    '/getnextid', 'getnextid',
+    '/receivedoc', 'receivedoc',
+
     # API
     '/search_product', 'search_product',
     '/prod_info', 'prod_info',
     )
+
+############
+# temporary receive doc
+###########
+class getnextid:
+    def GET(self):
+        for n in newegg_col.find():
+            ni = n['neweggid']
+            outpath = "neweggreview/%s.html"%(ni)
+            if os.path.isfile(outpath):
+                continue
+            return json.dumps({'newegg_id':ni})
+        return json.dumps({})
+
+
+class receivedoc:
+    def POST(self):
+        d = web.input()
+        content =  d['data']
+        url = d['url']
+        ni = url[url.rindex('=')+1:]
+        outpath = "neweggreview/%s.html"%(ni)
+        if os.path.isfile(outpath):
+            return {'status':'exist'}
+        with open(outpath,'w') as f:
+            content = content.encode('ascii','ignore')
+            print>>f, content
+        return {'status':'good'}
+
 
 #############
 # HTML

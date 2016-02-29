@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+
+  "name": "Getting started example",
+  "description": "This extension shows a Google Image search result for the current page",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png"
+  },
+
+  "background": {
+    "scripts": ["background.js", "jquery-1.12.1.js"],
+    "persistent": false
+  },
+
+  "content_scripts": [{
+    "matches": ["*://*.newegg.com/*"],
+    "js": ["content.js"]
+  }],
+
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "webNavigation",
+    "https://ajax.googleapis.com/",
+    "*://*.newegg.com/*",
+    "http://rtds9.cse.tamu.edu:8080/",
+    "http://*/"
+  ]
+}
