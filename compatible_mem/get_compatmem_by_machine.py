@@ -67,6 +67,18 @@ def get_mem_list(mem_list_str):
     print mem_url_list
     return mem_url_list
 
+
+def get_cm_list_mp(manufacture, product):
+    manu_dic = {
+        "ASUSTeK Computer Inc.":"ASUS", 
+        "Dell Inc.": "Dell"}
+    if manu_dic.has_key(manufacture):
+        tmp_str = manu_dic[manufacture]
+    else:
+        tmp_str = manufacture
+    tmp_str += " "+product
+    return get_cm_list(tmp_str)
+
 def get_cm_list(machine_model):
     """
     step 1. identify the machine by search
