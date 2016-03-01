@@ -1,7 +1,17 @@
+"""
+
+# Function group 1
+Given a product id, 
+get the specification
+get all the sellers and price
+
+# Function group 2
+Given a specification, 
+get all matching products
+"""
+
 import os
 import simplejson
-
-    
 
 
 def get_match_prod():

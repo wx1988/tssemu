@@ -2,11 +2,12 @@
 This file is used to give suggestion based on the current system settings.
 """
 from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
 db = client.ram
 newegg_col = db.newegg
+prod_col = db.products
 
-client = MongoClient('localhost', 27017)
-from compatible_mem.get_compatmem_by_machine import get_cm_list
+from compatible_mem.get_compatmem_by_machine import get_cm_list_mp
 
 ########
 # global interface
@@ -21,17 +22,16 @@ def make_suggestion( sys_info ):
 # Suggestion based on the memory vendors
 ########
 def get_suggestion_mem_vendor(sys_info):
-    keywords = "%s %s"%(sys_info['manufacturer'], sys_info['productname'])
-    mem_list = get_cm_list(keywords)
+    # get by machine model
+    mem_list = get_cm_list_mp(sys_info['manufacturer'], sys_info['productname'])
+    
+    # TODO?
+    # for each memory, check weather in crucial_mem collection    
 
     # TODO, integrate crucial database with other database.
     # for each memory, step 1, check whether have this item
 
-    # if have, just return the id and info
-    # else, populate the main database
-
-    # TODO, based on these good ones, get all the common features
-
+    # TODO, summary the specification here
 
 ########
 # two modes of upgrading
@@ -43,7 +43,7 @@ def find_same_model(sys_info):
     if sys_info.has_key('mem_list') and len(sys_info['mem_list']) > 0:
         mem_model_list = [mem['model'] for mem in sys_info['mem_list']]
         for mem_model in mem_model_list:
-            obj = newegg_col.find_one( { 'model': mem_model } )
+            obj = prod_col.find_one( { 'model': mem_model } )
             # TODO, if not in the system, need to
             match_ram_list.append(obj)
     return match_ram_list
