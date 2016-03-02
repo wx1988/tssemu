@@ -3,6 +3,9 @@ client = MongoClient('localhost', 27017)
 db = client.ram
 newegg_col = db.newegg
 
+from suggest import make_suggestion
+from product_api import get_match_prod
+
 import os
 import web, json
 
@@ -80,6 +83,7 @@ class compare_products:
         render = web.template.render('templates/', base="base")
         return render.compare_products()
 
+
 #############
 # Post page
 #############
@@ -89,11 +93,24 @@ class suggest:
         get all compatible products,
         group them based on the upgrading
         """
+        render = web.template.render('templates/', base="base")
+        return render.suggestion()
+
+    def POST(self):
         d = web.input()
         sys_info = json.loads( d['sys_info'] )
-        print sys_info
-        return sys_info
-
+        # rendering the system information
+        #print sys_info
+        # redering the suggestions
+        suggestions = make_suggestion(sys_info)
+        _, match_spec = get_match_prod(sys_info)
+        return json.dumps({
+            'status':0,
+            'data':{
+                'suggestions':suggestions,
+                'match_spec': match_spec
+                }})
+        #return suggestions
 
 #############
 # RESTFUL API

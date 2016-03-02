@@ -22,6 +22,7 @@ from builddb.crucial.get_compatmem_by_machine import get_cm_list_mp
 
 def get_prod_by_model(model):
     m = prod_col.find_one({'model':model})
+
     return m
 
 def get_vote(vlist):
@@ -36,6 +37,7 @@ def get_vote(vlist):
             bk = k
     return bk
 
+
 def get_match_prod(sys_info):
     # find memory by memory model
     model_list = []
@@ -49,11 +51,13 @@ def get_match_prod(sys_info):
         if res:
             exact_mem_res_list.append(res)
 
+    # Suggestion based on the memory vendors
     # find memory by machine model
     mem_list_by_machine = get_cm_list_mp(
         sys_info['manufacturer'],
         sys_info['productname'])
-    print len(mem_list_by_machine)
+    print 'from crucial recommendation', len(mem_list_by_machine)
+    crucial_recommend_model_list = [ mem['model'] for mem in mem_list_by_machine]
 
     # find other compatible memory based on the voting
     search_spec = { 'metadata.freq':sys_info['mem_list'][0]['speed']}
@@ -70,29 +74,38 @@ def get_match_prod(sys_info):
     print search_spec
 
     spec_mem_list = [m for m in prod_col.find(search_spec)]
+    for i in range(len(spec_mem_list)):
+        # make json stringfy able
+        spec_mem_list[i]['_id'] = str(spec_mem_list[i]['_id'])
+        if spec_mem_list[i]['metadata'].has_key('_id'):
+            spec_mem_list[i]['metadata']['_id'] = str(spec_mem_list[i]['metadata']['_id'])
+
+        # special feature
+        if spec_mem_list[i]['model'] in crucial_recommend_model_list:
+            spec_mem_list[i]['feature'] = "crucial_recommend"
+        if spec_mem_list[i]['model'] in model_list:
+            spec_mem_list[i]['feature'] = "same_as_old"
+
     print len(spec_mem_list)
 
     # NOTE, return a bunch of information for next suggestion stage
-
-
-def get_prod_info():
-    res = get_match_prod()
-    return res[0]
+    return spec_mem_list, search_spec
 
 
 def get_review():
+    """
+    TODO
+    """
     pass
 
-
 def test_get_match_prod():
-    sys_info = {u'mem_list': [{u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other ', u'detail': u'Synchronous', u'speed': 2133}], u'manufacturer': u' Dell Inc.', u'slots': 8, u'maximum_capacity': 256, u'productname': u' Precision Tower 5810'}
+    #sys_info = {u'mem_list': [{u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other ', u'detail': u'Synchronous', u'speed': 2133}], u'manufacturer': u' Dell Inc.', u'slots': 8, u'maximum_capacity': 256, u'productname': u' Precision Tower 5810'}
+    sys_info = {"mem_list": [{"type": "DDR3", "model": "HMT451R7AFR8C-RD  ", "capacity": 4096, "detail": "Registered ", "speed": 1866}, {"type": "DDR3", "model": "HMT451R7AFR8C-RD  ", "capacity": 4096, "detail": "Registered ", "speed": 1866}], "slots": 8, "productname": " Precision T3610", "maximum_capacity": 128, "manufacturer": " Dell Inc."}
     print get_match_prod(sys_info)
-
 
 if __name__ == "__main__":
     #print get_match_prod()
     test_get_match_prod()
-
 
 """
     tmp_res = [
