@@ -130,6 +130,17 @@ class search_product:
         res = {'status':0, 'data':tmp_res}
         return json.dumps(res)
 
+    def POST(self):
+        d = web.input()
+        print d
+        print d['constraints']
+        search_spec = json.loads(d['constraints'])
+        from product_api import get_prod_by_spec
+        prod_list = get_prod_by_spec(search_spec)
+        return json.dumps({
+            'status':0,
+            'data':prod_list})
+
 
 if __name__ == "__main__":
     app = web.application(urls, globals())

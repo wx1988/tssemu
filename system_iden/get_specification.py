@@ -1,8 +1,10 @@
-
 import os
 import re
 import json
 import subprocess
+import sys
+import urllib
+import webbrowser
 
 def execute_cmd(cmd):
     """execute a command line command
@@ -81,9 +83,9 @@ def get_memory_str():
                 mem_info = {
                         'capacity':int(size_str),
                         'type':type_str,
-                        'detail':typed_str,
+                        'detail':typed_str.strip(),
                         'speed':int(speed_str),
-                        'model': pn_str
+                        'model': pn_str.strip()
                         }
                 sys_info['mem_list'].append( mem_info )
             except Exception as e:
@@ -97,7 +99,13 @@ if __name__ == "__main__":
     #print sys_info
     # TODO, design the sever part that receive such things
     url_tpl = "http://rtds9.cse.tamu.edu:8080/suggest?sys_info=%s"
-    print "data",json.dumps(sys_info)
-    the_url = url_tpl%(json.dumps(sys_info))
+    json_str = json.dumps(sys_info)
+    #json_str = json_str.replace(' ', '+')
+
+    the_url = url_tpl%(urllib.quote_plus(json.dumps(sys_info)))
+    #the_url = url_tpl%(json_str)
     print the_url
+    #the_url.replace("")
     os.system("explorer %s"%(the_url))
+
+    webbrowser.open(the_url)

@@ -1,18 +1,16 @@
-function urlParam(name){
-    //http://www.sitepoint.com/url-parameters-jquery/
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-    if (results==null){
-       return null;
-    }
-    else{
-       return results[1] || 0;
-    }
-}
+////////////////
+// global variables
+////////////////
+constraints = null;
 
+////////////////
+// functions
+////////////////
 function get_sysinfo(){
     var name = 'sys_info';
     var results = urlParam(name);
     var sysinfo_str = decodeURIComponent(results);
+    sysinfo_str = sysinfo_str.replace(/\+/g, " ");
     var sysinfo = JSON.parse( sysinfo_str );
     return sysinfo;
 }
@@ -44,32 +42,35 @@ function render_sysinfo(){
     var html_str = machine_model + "<br/>";
     html_str += memory_limits + "<br/>";
     html_str += memory_list;
-    jQuery('#sysinfo').html(html_str);
+
+var t = `<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#{0}">
+                    {1}
+                </a>
+            </h4>
+
+            <div id="{0}" class="panel-collapse">
+                <div class="panel-body">
+
+                    {2}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>`;
+
+    var id_str = "system_info"
+    var header_str = "System Information";
+
+    var tmp_str = String.format(t, id_str, header_str, html_str);
+
+    jQuery('#sysinfo').html(tmp_str);
 }
 
-function render_memory_str(mem_metadata){
-    // the metadata
-    var tmp_str = "";
-    // brand model
-    tmp_str += mem_metadata.brand+', ';
-    tmp_str += mem_metadata.model+', ';
-
-    // specification, type, freq, pin, reg, ecc, cap
-    tmp_str += mem_metadata.type+', ';
-    tmp_str += mem_metadata.freq+"Mhz"+', ';
-    tmp_str += mem_metadata.pin+"-Pin"+', ';
-    if(mem_metadata.reg)
-        tmp_str += "Registered"+', ';
-    if(mem_metadata.ecc)
-        tmp_str += "ECC"+', ';
-    else
-        tmp_str += "NonECC"+', ';
-    tmp_str += mem_metadata.number + "x" +mem_metadata.capacity+"GB"+', ';
-
-    // price
-    tmp_str += "Unit price ($"+mem_metadata.price+")";
-    return tmp_str;
-}
 
 function render_products_list(products){
     // the products of interest under each plan
@@ -86,7 +87,7 @@ function render_products_list(products){
     return html_str;
 }
 
-function get_min_price(products){
+function get_min_price_of_all(products){
     var cur_min_price = 100000;
     for(var i=0;i < products.length;i++){
         if(products[i].min_price < cur_min_price)
@@ -96,26 +97,21 @@ function get_min_price(products){
 }
 
 function create_panel(id_str, header_str, content_str){
-    if (!String.format) {
-      String.format = function(format) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        return format.replace(/{(\d+)}/g, function(match, number) {
-          return typeof args[number] != 'undefined'
-            ? args[number]
-            : match
-          ;
-        });
-      };
-    }
-
     var t = `<div class="panel-group">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h4 class="panel-title">
-                <a data-toggle="collapse" href="#{0}">
-                    {1}
-                </a>
-            </h4>
+            <div class="row">
+                <div class="col-sm-10">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#{0}">
+                            {1}
+                        </a>
+                    </h4>
+                </div>
+                <div class="col-sm-2">
+                    <a href='{3}'> View More >> </a>
+                </div>
+            </div>
 
             <div id="{0}" class="panel-collapse collapse">
                 <div class="panel-body">
@@ -127,7 +123,11 @@ function create_panel(id_str, header_str, content_str){
         </div>
     </div>
 </div>`;
-    return String.format(t, id_str, header_str, content_str);
+
+    var tmp_url = "/list_product?constraints=";
+    tmp_url += encodeURIComponent( JSON.stringify(constraints));
+    var res = String.format(t, id_str, header_str, content_str, tmp_url);
+    return res;
 }
 
 function suggestion_render_keepold(ts2plans){
@@ -138,7 +138,7 @@ function suggestion_render_keepold(ts2plans){
 
         var id_str = "keepold"+ts;
         var header_str = "Keep Old Mem, Target Size:"+ ts;
-        header_str += ", Min Price:$"+get_min_price(products);
+        header_str += ", Min Price:$"+get_min_price_of_all(products);
         var prod_str = render_products_list(products);
         var tmp_str = create_panel(id_str, header_str, prod_str);
 
@@ -155,7 +155,7 @@ function suggestion_render_fullreplace(ts2plans){
 
         var id_str = "fullreplace"+ts;
         var header_str = "Replace All Memory, Target Size:"+ ts;
-        header_str += ", Min Price:$"+get_min_price(products);
+        header_str += ", Min Price:$"+get_min_price_of_all(products);
         var prod_str = render_products_list(products);
 
         var tmp_str = create_panel(id_str, header_str, prod_str);
@@ -173,6 +173,8 @@ function suggestion_render(data){
         return;
     }
     data = data.data;
+    //
+    constraints = data.match_spec;
     // render this part
     suggestion_render_fullreplace(data.suggestions.full_replace);
     suggestion_render_keepold(data.suggestions.keep_old);

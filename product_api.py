@@ -91,6 +91,30 @@ def get_match_prod(sys_info):
     # NOTE, return a bunch of information for next suggestion stage
     return spec_mem_list, search_spec
 
+def get_prod_by_spec(spec_dic):
+    spec_mem_list = [m for m in prod_col.find(spec_dic)]
+
+    for i in range(len(spec_mem_list)):
+        # make json stringfy able
+        spec_mem_list[i]['_id'] = str(spec_mem_list[i]['_id'])
+        if spec_mem_list[i]['metadata'].has_key('_id'):
+            spec_mem_list[i]['metadata']['_id'] = str(spec_mem_list[i]['metadata']['_id'])
+
+    # filter by price information
+    def check_price(mem):
+        good = False
+        for web_info in mem['websites']:
+            if web_info.has_key('price') and web_info['price']:
+                return True
+        return good
+
+    new_res = []
+    for mem in spec_mem_list:
+        if not check_price(mem):
+            continue
+        new_res.append(mem)
+    return new_res
+
 
 def get_review():
     """
