@@ -3,7 +3,11 @@ import urllib2
 
 # folders
 root_folder = "/home/xingwang/project/tsse"
-crucial_cache_folder = "%s/compatible_mem/crawldata"%(root_folder)
+crucial_cache_folder = "%s/builddb/crucial/crawldata"%(root_folder)
+newegg_folder = "%s/builddb/newegg"%(root_folder)
+newegg_ram_md_folder = "%s/metadata"%(newegg_folder)
+newegg_html_cache_folder = "%s/neweggcache"%(newegg_folder)
+bb_memory_folder = "%s/builddb/bestbuy/memory"%(root_folder)
 
 # regex
 href_reg = "href=\"((\s|\S)*?)\""

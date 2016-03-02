@@ -1,20 +1,100 @@
 """
 
 # Function group 1
-Given a product id, 
+Given a product id,
 get the specification
 get all the sellers and price
 
 # Function group 2
-Given a specification, 
+Given a specification,
 get all matching products
 """
 
 import os
-import simplejson
+import json
+
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+db = client.ram
+prod_col = db.products
+
+from builddb.crucial.get_compatmem_by_machine import get_cm_list_mp
+
+def get_prod_by_model(model):
+    m = prod_col.find_one({'model':model})
+    return m
+
+def get_vote(vlist):
+    tdic = {}
+    for v in vlist:
+        if not tdic.has_key(v):
+            tdic[v] = 0
+        tdic[v] += 1
+    bk = tdic.keys()[0]
+    for k in tdic.keys():
+        if tdic[k] > tdic[bk]:
+            bk = k
+    return bk
+
+def get_match_prod(sys_info):
+    # find memory by memory model
+    model_list = []
+    for mem in sys_info['mem_list']:
+        model_list.append( mem['model'].strip() )
+    model_list = list(set(model_list))
+
+    exact_mem_res_list = []
+    for model in model_list:
+        res = get_prod_by_model(model)
+        if res:
+            exact_mem_res_list.append(res)
+
+    # find memory by machine model
+    mem_list_by_machine = get_cm_list_mp(
+        sys_info['manufacturer'],
+        sys_info['productname'])
+    print len(mem_list_by_machine)
+
+    # find other compatible memory based on the voting
+    search_spec = { 'metadata.freq':sys_info['mem_list'][0]['speed']}
+    # type, reg, ecc, pin
+    if len(mem_list_by_machine) == 0:
+        # TODO, a bad thing
+        raise Exception("TODO, crucial recommendation zero")
+    else:
+        # vote to get the right specification
+        search_spec['metadata.type'] = get_vote([mem['metadata']['type'] for mem in mem_list_by_machine if mem['metadata'].has_key('type') ] )
+        search_spec['metadata.reg'] = get_vote([mem['metadata']['reg'] for mem in mem_list_by_machine if mem['metadata'].has_key('reg') ] )
+        search_spec['metadata.ecc'] = get_vote([mem['metadata']['ecc'] for mem in mem_list_by_machine if mem['metadata'].has_key('ecc') ])
+        search_spec['metadata.pin'] = get_vote([mem['metadata']['pin'] for mem in mem_list_by_machine if mem['metadata'].has_key('pin') ])
+    print search_spec
+
+    spec_mem_list = [m for m in prod_col.find(search_spec)]
+    print len(spec_mem_list)
+
+    # NOTE, return a bunch of information for next suggestion stage
 
 
-def get_match_prod():
+def get_prod_info():
+    res = get_match_prod()
+    return res[0]
+
+
+def get_review():
+    pass
+
+
+def test_get_match_prod():
+    sys_info = {u'mem_list': [{u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other ', u'detail': u'Synchronous', u'speed': 2133}], u'manufacturer': u' Dell Inc.', u'slots': 8, u'maximum_capacity': 256, u'productname': u' Precision Tower 5810'}
+    print get_match_prod(sys_info)
+
+
+if __name__ == "__main__":
+    #print get_match_prod()
+    test_get_match_prod()
+
+
+"""
     tmp_res = [
 {
 'model':'CT4K4G4RFS8213',
@@ -67,7 +147,7 @@ def get_match_prod():
     'id':'N82E16820242104',
     'sellerid':'newegg',
     'price':133.4,
-    }, 
+    },
     {
         'source':'Amazon',
         'id':'B00X60MU68',
@@ -99,14 +179,4 @@ def get_match_prod():
 },
 
 ]
-    return tmp_res
-
-def get_prod_info():
-    res = get_match_prod()
-    return res[0]
-
-def get_review():
-    pass
-
-if __name__ == "__main__":
-    print get_match_prod()
+"""

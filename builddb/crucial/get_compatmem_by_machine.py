@@ -16,12 +16,13 @@ from pymongo import MongoClient
 client = MongoClient('localhost', 27017)
 db = client.ram
 cru_m_col = db.crucial_machine
+prod_col = db.products
 
 from tsse_common import crucial_cache_folder as cache_folder
 from tsse_common import download_url
 from tsse_common import href_reg
 
-from compatible_mem.get_crucial_spec import get_spec
+from builddb.crucial.get_crucial_spec import get_spec
 
 def get_mem_list(mem_list_str):
     """
@@ -44,17 +45,57 @@ def get_mem_list(mem_list_str):
     print mem_url_list
     return mem_url_list
 
-
 def get_cm_list_mp(manufacture, product):
     manu_dic = {
-        "ASUSTeK Computer Inc.":"ASUS", 
+        "ASUSTeK Computer Inc.":"ASUS",
         "Dell Inc.": "Dell"}
     if manu_dic.has_key(manufacture):
         tmp_str = manu_dic[manufacture]
     else:
         tmp_str = manufacture
     tmp_str += " "+product
-    return get_cm_list(tmp_str)
+    mem_info_list = get_cm_list(tmp_str)
+
+    # check whether they are in the main db
+    res_list = []
+    for mem_info in mem_info_list:
+        p = prod_col.find_one({'model':mem_info['model']})
+        if not p:
+            # if not in products, insert new
+            prod_col.insert({
+                'model':mem_info['model'],
+                'metadata': mem_info,
+                'websites':[{
+                    'website':'crucial',
+                    'price':mem_info['price'],
+                    'id':mem_info['model']}]
+                    })
+        else:
+            # if exists and crucial in the websites, continue
+            website_list = [webinfo['website'] for webinfo in p['websites']]
+            if 'crucial' not in website_list:
+                tmp_websites = p['websites']
+                tmp_websites.append({
+                    'website':'crucial',
+                    'price':mem_info['price'],
+                    'id':mem_info['model']})
+                prod_col.update(
+                    {"model":mem_info['model']},
+                    {"$set":{"websites":tmp_websites}})
+
+            # update the metadata field
+            metadata_update = False
+            if metadata_update:
+                tmp_metadata = p['metadata']
+                tmp_metadata = dict(tmp_metadata.items()+mem_info.items())
+                prod_col.update(
+                        {"model":mem_info['model']},
+                        {"$set":{"metadata":tmp_metadata}})
+
+        p = prod_col.find_one({'model':mem_info['model']})
+        res_list.append(p)
+
+    return res_list
 
 def get_cm_list(machine_model):
     """
@@ -113,7 +154,7 @@ def test_get_cm_list_mp():
     #test_p_name = "Precision Tower 5810"
     test_m_name = "Gigabyte Technology Co., Ltd."
     test_p_name = "To be filled by O.E.M."
-    print get_cm_list_mp(test_m_name, test_p_name)    
+    print get_cm_list_mp(test_m_name, test_p_name)
 
 if __name__ == "__main__":
     #test_get_cmlist()

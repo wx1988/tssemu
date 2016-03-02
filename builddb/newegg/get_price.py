@@ -4,9 +4,12 @@ import json
 import urllib2
 
 from format_product_bigsem import format_complete_prod
-from format_product_free import format_incomplete_prod
+from builddb.format_product_free import format_incomplete_prod
+from tsse_common import newegg_html_cache_folder
 
-newegg_cache_folder = "neweggcache"
+newegg_cache_folder = newegg_html_cache_folder
+debug = 0
+
 def download_newegg(neweggid):
     cache_path = "%s/%s.html"%(newegg_cache_folder,neweggid)
     if os.path.isfile(cache_path):
@@ -19,44 +22,56 @@ def download_newegg(neweggid):
     return tmp_str
 
 def extract_price(neweggid):
+    if debug:
+        print neweggid
     tmp_str = download_newegg(neweggid)
     #tmp_str = open("9SIA8H53HD8572.html").read()
-    biz_reg = "(Biz.Product\.GroupItemSwitcher\.init\(\{(\s|\S)*?\}\);)"
-    m = re.search(biz_reg, tmp_str)
-    all_str = m.group(1)
-    #print all_str
-    lines = all_str.split("\n")
+
     # TODO, get the price information
-    if all_str.count("properties:null") > 0:
-        #[{"info":{"item":"20-326-573","price":151.9,"vehicle":null},"map":[]}]
+    try:
+        biz_reg = "(Biz.Product\.GroupItemSwitcher\.init\(\{(\s|\S)*?\}\);)"
+        m = re.search(biz_reg, tmp_str)
+        all_str = m.group(1)
+        if debug:
+            print all_str
+        lines = all_str.split("\n")
 
-        tmp_line = lines[2].strip()
-        tmp_line = tmp_line[tmp_line.index("["):-1]
-        tmp_dic = json.loads(tmp_line)
-        return tmp_dic[0]['info']['price']
-    else:
-        # TODO, each product of different specification is different id
+        if all_str.count("properties:null") > 0:
+            #[{"info":{"item":"20-326-573","price":151.9,"vehicle":null},"map":[]}]
+            tmp_line = lines[2].strip()
+            tmp_line = tmp_line[tmp_line.index("["):-1]
+            tmp_dic = json.loads(tmp_line)
+            return tmp_dic[0]['info']['price']
+        else:
+            # TODO, each product of different specification is different id
 
-        # selectedProperties
-        tmp_line = lines[3].strip()
-        tmp_line = tmp_line[tmp_line.index("["):]
-        #print tmp_line
-        select_list = json.loads(tmp_line)
-        select_dic = {s['name']:s['value'] for s in select_list}
+            # selectedProperties
+            tmp_line = lines[3].strip()
+            tmp_line = tmp_line[tmp_line.index("["):]
+            #print tmp_line
+            select_list = json.loads(tmp_line)
+            select_dic = {s['name']:s['value'] for s in select_list}
 
-        # all mapping
-        tmp_line = lines[2].strip()
-        tmp_line = tmp_line[tmp_line.index("["):-1]
-        all_map = json.loads(tmp_line)
+            # all mapping
+            tmp_line = lines[2].strip()
+            tmp_line = tmp_line[tmp_line.index("["):-1]
+            all_map = json.loads(tmp_line)
 
-        for info in all_map:
-            propertymap = info['map']
-            match = True
-            for pm in propertymap:
-                if select_dic[ pm['name'] ] != pm['value']:
-                    match = False
-            if match:
-                return info['info']['price']
+            for info in all_map:
+                propertymap = info['map']
+                match = True
+                for pm in propertymap:
+                    if select_dic[ pm['name'] ] != pm['value']:
+                        match = False
+                if match:
+                    return info['info']['price']
+    except Exception as e:
+        li_reg = "<li class=\"price-current\"(\s|\S)*?content=\"(\d+[.\d+])\">"
+        m = re.search(li_reg, tmp_str)
+        #print m
+        #exit(1)
+        #product_sale_price
+
     return None
 
 def test_extract_price():

@@ -10,6 +10,7 @@ type_reg = "(\d+)-Pin (DDR\d) (\w+)"
 speed_reg = "(DDR\d) (\d+) \((PC\d) (\d+)\)"
 cas_reg = "\d+"
 timing_reg = "\d-\d-\d"
+
 #timing_reg = "\d-\d-\d", possible with four measure
 volt_reg = "(\d\.\d+)\s*V"
 ecc_reg = "Yes|No"
@@ -17,7 +18,7 @@ buf_reg = "Buffered|Unbuffered"
 kit_reg = "\w+"
 heat_reg = "Yes|No"
 
-from format_product_free import get_capacity, get_typefreq
+from builddb.format_product_free import get_capacity, get_typefreq
 
 def format_complete_prod(prod_md):
     if not prod_md['newegg_product'].has_key("specifications_table"):
@@ -55,14 +56,17 @@ def format_complete_prod(prod_md):
             prod_info['number'] = int(m.group(1))
         """
 
+    # freq
     if kv.has_key('Speed'):
         tf_dic = get_typefreq(kv['Speed'])
         prod_info = dict(prod_info.items() + tf_dic.items())
         """
         prod_info['type'] = kv['Type'].split(" ")[1]
-        prod_info['pin'] = int( kv['Type'].split(" ")[0].split('-')[0] )
         prod_info['freq'] = int( kv['Speed'].split(" ")[1])
         """
+    # pin number
+    if kv.has_key("Type"):
+        prod_info['pin'] = int( kv['Type'].split(" ")[0].split('-')[0] )
 
     # ECC
     if kv.has_key('ECC'):
@@ -74,7 +78,11 @@ def format_complete_prod(prod_md):
     # registered
     br = "Buffered/Registered"
     if kv.has_key(br):
-        prod_info["reg"] = kv[br]
+        if kv[br] == "Unbuffered":
+            prod_info["reg"] = False
+        if kv[br] == "Registered":
+            prod_info["reg"] = True
+
 
     # TODO, possible two voltage
     if kv.has_key("Voltage"):
@@ -90,9 +98,12 @@ def test_complete():
     pid = "9SIA0ZX2M46757"
     pid = "N82E16820231569" # kit
     pid = "N82E16820148959"
+    # desktop, nonecc
+    pid = "N82E16820231654"
+    # server, registered, ecc
+    pid = "N82E16820147382"
     prod_md = json.load(open("metadata/%s.json"%(pid)))
-    format_complete_prod(prod_md)
-
+    print format_complete_prod(prod_md)
 
 if __name__ == "__main__":
     test_complete()

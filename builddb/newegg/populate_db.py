@@ -7,8 +7,10 @@ import time
 from pymongo import MongoClient
 
 from format_product_bigsem import format_complete_prod
-from format_product_free import format_incomplete_prod
+from builddb.format_product_free import format_incomplete_prod
 
+from tsse_common import newegg_ram_md_folder as ram_md_folder
+from get_price import extract_price
 # TODO, connect the db here. write the db configuration in a separate files.
 #from consts import MONGO_DB_HOST, MONGO_DB_USER, MONGO_DB_PASSWD
 
@@ -29,8 +31,7 @@ def import_ram():
                 'neweggid':neweggid,
                 'data': obj })
 
-def extract_metadata():
-    def check_ok(prod_info):
+def check_ok(prod_info):
         nece_list = ['type', 'freq', 'capacity']
         for k in nece_list:
             if not prod_info.has_key(k):
@@ -38,6 +39,7 @@ def extract_metadata():
                 return False
         return True
 
+def extract_metadata():
     ram_md_folder = "metadata"
     for fname in os.listdir(ram_md_folder):
         if not fname.endswith("json"):
@@ -64,7 +66,7 @@ def extract_metadata():
             print e
 
 def populate_price():
-	from get_price import extract_price
+
 	neweggid_list = []
 	for ni in newegg_col.find():
 		neweggid_list.append(ni['neweggid'])
@@ -95,8 +97,37 @@ def try_search():
     for i in res:
         print i
 
+
+def update_metadata(neweggid):
+    prod_info = {}
+    prod_md_str = open("%s/%s.json"%(ram_md_folder, neweggid),'r').read()
+    prod_md = json.loads(prod_md_str)
+    try:
+        p1 = format_complete_prod(prod_md)
+        ok1 = check_ok(p1)
+        if ok1:
+            prod_info = p1
+        else:
+            prod_info = format_incomplete_prod(prod_md_str)
+    except Exception as e:
+        print e
+    prod_info['price'] = extract_price(neweggid)
+    print prod_info
+    newegg_col.update(
+        {'neweggid':neweggid},
+        {"$set":{'metadata':prod_info}})
+
+def update_metadata_all():
+    # get all newegg list
+    for fname in os.listdir(ram_md_folder):
+        if not fname.endswith("json"):
+            continue
+        neweggid = fname[:-5]
+        update_metadata(neweggid)
+
 if __name__ == "__main__":
     #import_ram()
     #extract_metadata()
     #try_search()
-    populate_price()
+    #populate_price()
+    update_metadata("N82E16820231225")

@@ -54,6 +54,23 @@ def try_search():
     for i in res:
         print i
 
+def update_metadata(skuid):
+
+    try:
+        metadata = es_bb(skuid)
+        bb_col.update(
+            {"skuid":skuid},
+            {"$set":{"metadata":metadata}})
+    except Exception as e:
+        print "bad", skuid
+
+def update_metadata_all():
+    skuid_list = []
+    for bb in bb_col.find():
+        skuid_list.append( bb['skuid'] )
+    for skuid in skuid_list:
+        update_metadata(skuid)
+
 if __name__ == '__main__':
     #import_ram()
     #extract_meta()
