@@ -1,3 +1,10 @@
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+db = client.ram
+az_review_col = db.amazon_review
+az_col = db.amazon
+
+
 import json
 import gzip
 import pickle
@@ -91,12 +98,39 @@ def nltk_freq():
     for r in rlist:
         wlist_list.append( word_tokenize( r['reviewText'] ) )
 
+##########
+# fill reviews
+##########
+def fill_reviews():
+    # review into db    
+    rlist = pickle.load( open('memory_review.pkl','r'))
+    for r in rlist:
+        az_review_col.insert(r)
 
+def collect_reviews():
+    asin_list = []
+    for prod in az_col.find():
+        if prod.has_key('review'):
+            continue
+        asin_list.append( prod['asin'] )
+
+    for asin in asin_list:
+        rid_list = []
+        rscore_list = []
+        for r in az_review_col.find({'asin':asin}):
+            rid_list.append( str(r['_id']) )
+            rscore_list.append( r['overall'] )
+        review_dic = {'rid_list':rid_list, 'rscore_list':rscore_list}
+        az_col.update(
+            {'asin':asin},
+            {'$set':{'review':review_dic}} )
 
 if __name__ == "__main__":
     #read_product()
     #get_memory_prod()
     #get_memory_reviews()
     #get_bad_reviews()
-    nltk_freq()
+    #nltk_freq()
+    #fill_reviews()
+    collect_reviews()
     

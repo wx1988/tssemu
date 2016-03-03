@@ -1,3 +1,4 @@
+
 import os
 import re
 import json
@@ -19,6 +20,10 @@ db = client.ram
 newegg_col = db.newegg
 
 def import_ram():
+    """
+    enumerate all files in metadata folder (metadata from bigsemantics)
+    insert into mongo database
+    """
     ram_md_folder = "metadata"
     for fname in os.listdir(ram_md_folder):
         if not fname.endswith("json"):
@@ -32,14 +37,22 @@ def import_ram():
                 'data': obj })
 
 def check_ok(prod_info):
-        nece_list = ['type', 'freq', 'capacity']
-        for k in nece_list:
-            if not prod_info.has_key(k):
-                print 'missing', k
-                return False
-        return True
+    """
+    check whether the information is enough
+    """    
+    nece_list = ['type', 'freq', 'capacity']
+    for k in nece_list:
+        if not prod_info.has_key(k):
+            print 'missing', k
+            return False
+    return True
+
 
 def extract_metadata():
+    """
+    based on the metadata from bigsemantic, 
+    also use regex to get accurate specification in unified representation
+    """
     ram_md_folder = "metadata"
     for fname in os.listdir(ram_md_folder):
         if not fname.endswith("json"):
@@ -66,7 +79,9 @@ def extract_metadata():
             print e
 
 def populate_price():
-
+    """
+    extract the price information from the webpage
+    """
 	neweggid_list = []
 	for ni in newegg_col.find():
 		neweggid_list.append(ni['neweggid'])
@@ -81,23 +96,9 @@ def populate_price():
 		except Exception as e:
 			print e
 
-def try_search():
-    """
-    288,     ddr4,     2133,     4G
-    """
-    pin_v = 288
-    type_v = "DDR4"
-    freq_v = 2133
-    cap_v = 4
-    res = newegg_col.find({
-    	"metadata.pin":pin_v,
-    	"metadata.type":type_v,
-    	"metadata.freq":freq_v,
-    	"metadata.capacity":cap_v})
-    for i in res:
-        print i
-
-
+############
+# interface to populate database
+############
 def update_metadata(neweggid):
     prod_info = {}
     prod_md_str = open("%s/%s.json"%(ram_md_folder, neweggid),'r').read()
@@ -124,6 +125,7 @@ def update_metadata_all():
             continue
         neweggid = fname[:-5]
         update_metadata(neweggid)
+
 
 if __name__ == "__main__":
     #import_ram()

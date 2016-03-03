@@ -42,7 +42,8 @@ def get_match_prod(sys_info):
     # find memory by memory model
     model_list = []
     for mem in sys_info['mem_list']:
-        model_list.append( mem['model'].strip() )
+        if mem.has_key('model'):
+            model_list.append( mem['model'].strip() )
     model_list = list(set(model_list))
 
     exact_mem_res_list = []
