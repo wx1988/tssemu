@@ -46,6 +46,8 @@ def get_mem_list(mem_list_str):
     return mem_url_list
 
 def get_cm_list_mp(manufacture, product):
+    manufacture = manufacture.strip()
+    product = product.strip()
     manu_dic = {
         "ASUSTeK Computer Inc.":"ASUS",
         "Dell Inc.": "Dell"}
@@ -152,8 +154,10 @@ def test_get_cmlist():
 def test_get_cm_list_mp():
     #test_m_name = "Dell Inc. "
     #test_p_name = "Precision Tower 5810"
-    test_m_name = "Gigabyte Technology Co., Ltd."
-    test_p_name = "To be filled by O.E.M."
+    #test_m_name = "Gigabyte Technology Co., Ltd."
+    #test_p_name = "To be filled by O.E.M."
+    test_m_name = "ASUSTeK Computer Inc."
+    test_p_name = "K43SJ"
     print get_cm_list_mp(test_m_name, test_p_name)
 
 if __name__ == "__main__":

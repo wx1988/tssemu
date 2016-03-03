@@ -28,7 +28,7 @@ def get_memory_str():
     sys_info = {}
 
     # machine model
-    dmidecode_cmd = ["dmidecode", "-t", "system"]
+    dmidecode_cmd = ["./dmidecode", "-t", "system"]
     output = execute_cmd(dmidecode_cmd)
     lines = [line.strip() for line in output.split("\n")]
     for line in lines:
@@ -38,7 +38,7 @@ def get_memory_str():
             sys_info['productname'] = line[line.index(":")+1:]
 
     # some system info
-    dmidecode_cmd = ["dmidecode", "-t", "16"]
+    dmidecode_cmd = ["./dmidecode", "-t", "16"]
     output = execute_cmd( dmidecode_cmd )
     lines = [line.strip() for line in output.split("\n")]
     for line in lines:
@@ -50,11 +50,10 @@ def get_memory_str():
             sys_info['slots'] = int( ws[1])
 
     # get existing memories
-    dmidecode_cmd = ["dmidecode", "-t", "17"]
+    dmidecode_cmd = ["./dmidecode", "-t", "17"]
     output = execute_cmd( dmidecode_cmd )
     lines = [line.strip() for line in output.split("\n")]
     #print output
-
 
     # 1. size
     size_re = re.compile("Size: (\d+) MB")
@@ -65,7 +64,6 @@ def get_memory_str():
     speed_re = re.compile("Speed: (\d+) MHz")
     # 4. Part number
     pn_re = re.compile("Part Number: ([\w -/]+)")
-
 
     sys_info['mem_list'] = []
     mem_list = output.split('\n\n')

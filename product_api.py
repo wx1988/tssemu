@@ -60,13 +60,18 @@ def get_match_prod(sys_info):
     crucial_recommend_model_list = [ mem['model'] for mem in mem_list_by_machine]
 
     # find other compatible memory based on the voting
-    search_spec = { 'metadata.freq':sys_info['mem_list'][0]['speed']}
+    search_spec = {}
+    if len(sys_info['mem_list']) >0:
+        search_spec = { 'metadata.freq':sys_info['mem_list'][0]['speed']}
+
     # type, reg, ecc, pin
     if len(mem_list_by_machine) == 0:
         # TODO, a bad thing
         raise Exception("TODO, crucial recommendation zero")
     else:
         # vote to get the right specification
+        if not search_spec.has_key('metadata.freq'):
+            search_spec['metadata.freq'] = get_vote([mem['metadata']['freq'] for mem in mem_list_by_machine if mem['metadata'].has_key('freq') ] )    
         search_spec['metadata.type'] = get_vote([mem['metadata']['type'] for mem in mem_list_by_machine if mem['metadata'].has_key('type') ] )
         search_spec['metadata.reg'] = get_vote([mem['metadata']['reg'] for mem in mem_list_by_machine if mem['metadata'].has_key('reg') ] )
         search_spec['metadata.ecc'] = get_vote([mem['metadata']['ecc'] for mem in mem_list_by_machine if mem['metadata'].has_key('ecc') ])
