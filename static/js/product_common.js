@@ -65,7 +65,11 @@ function gen_prod_desc(mem_metadata){
 function sort_product_by_review(prod_list){
     var tmp_prod_list = prod_list;
     tmp_prod_list.sort(function(a,b){
-        return  (b.mean_review - a.mean_review)*1000+ (b.review_num - a.review_num);
+        var part1 = (b.mean_review - a.mean_review)*1000000;
+        var part2 = (b.review_num - a.review_num)*1000;
+        var part3 = get_min_price(a) - get_min_price(b);
+        return part1 + part2 + part3;
+
     });
     return tmp_prod_list;
 }

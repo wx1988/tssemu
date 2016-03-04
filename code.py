@@ -4,6 +4,7 @@ db = client.ram
 newegg_col = db.newegg
 
 from suggest import make_suggestion
+from suggest2 import make_suggestion2
 from product_api import get_match_prod
 
 import os
@@ -17,7 +18,8 @@ urls=(
     '/compare', 'compare_products', # compare two or three products
 
     # POST service
-    '/suggest', 'suggest',
+    '/suggest2', 'suggest2',
+    '/suggest', 'suggest',    
 
     # interactive cralwer
     '/getnextid', 'getnextid',
@@ -111,6 +113,30 @@ class suggest:
                 'match_spec': match_spec
                 }})
         #return suggestions
+
+class suggest2:
+    def GET(self):
+        """
+        get all compatible products,
+        group them based on the upgrading
+        """
+        render = web.template.render('templates/', base="base")
+        return render.suggestion2()        
+
+    def POST(self):
+        d = web.input()
+        sys_info = json.loads( d['sys_info'] )
+        # rendering the system information
+        #print sys_info
+        # redering the suggestions
+        suggestions = make_suggestion2(sys_info)
+        _, match_spec = get_match_prod(sys_info)
+        return json.dumps({
+            'status':0,
+            'data':{
+                'suggestions':suggestions,
+                'match_spec': match_spec
+                }})
 
 #############
 # RESTFUL API
