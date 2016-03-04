@@ -61,3 +61,27 @@ function gen_prod_desc(mem_metadata){
     tmp_str += mem_metadata.number + "x" +mem_metadata.capacity+"GB";
     return tmp_str;
 }
+
+function sort_product_by_review(prod_list){
+    var tmp_prod_list = prod_list;
+    tmp_prod_list.sort(function(a,b){
+        return  (b.mean_review - a.mean_review)*1000+ (b.review_num - a.review_num);
+    });
+    return tmp_prod_list;
+}
+
+function sort_product_by_price_lh(prod_list){
+    var tmp_prod_list = prod_list;
+    tmp_prod_list.sort(function(a,b){
+        return  get_min_price(a) - get_min_price(b);
+    });
+    return tmp_prod_list;
+}
+
+function sort_product_by_price_hl(prod_list){
+    var tmp_prod_list = prod_list;
+    tmp_prod_list.sort(function(a,b){
+        return  get_min_price(b) - get_min_price(a);
+    });
+    return tmp_prod_list;
+}

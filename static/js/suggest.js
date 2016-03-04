@@ -65,20 +65,27 @@ var t = `<div class="panel-group">
 
     var id_str = "system_info"
     var header_str = "System Information";
-
     var tmp_str = String.format(t, id_str, header_str, html_str);
 
     jQuery('#sysinfo').html(tmp_str);
 }
 
-
 function render_products_list(products){
+    // TODO, sort by review, and add the
+    products = sort_product_by_review(products);
+    
     // the products of interest under each plan
     var html_str = "<ul>";
     for(var i = 0;i < products.length;i++){
         html_str += "<li>";
         html_str += render_memory_str(products[i].metadata);
         html_str += "<br/>";
+
+        // TODO, add review summarization here
+        var star = Math.round( products[i].mean_review );
+        html_str += "<img src='static/imgs/"+star+"star.png' width='50'/>";
+        html_str += "("+products[i].review_num+" reviews)<br/>";
+
         html_str += "Buy "+products[i].buy_number+" unit"+', ';
         html_str += "Min price: $ "+products[i].min_price+" ";
         html_str += "</li>";
@@ -103,22 +110,15 @@ function create_panel(id_str, header_str, content_str){
             <div class="row">
                 <div class="col-sm-10">
                     <h4 class="panel-title">
-                        <a data-toggle="collapse" href="#{0}">
-                            {1}
-                        </a>
+                        <a data-toggle="collapse" href="#{0}">{1}</a>
                     </h4>
                 </div>
                 <div class="col-sm-2">
                     <a href='{3}'> View More >> </a>
                 </div>
             </div>
-
             <div id="{0}" class="panel-collapse collapse">
-                <div class="panel-body">
-
-                    {2}
-
-                </div>
+                <div class="panel-body">{2}</div>
             </div>
         </div>
     </div>
@@ -139,6 +139,7 @@ function suggestion_render_keepold(ts2plans){
         var id_str = "keepold"+ts;
         var header_str = "Keep Old Mem, Target Size:"+ ts;
         header_str += ", Min Price:$"+get_min_price_of_all(products);
+        // TODO, order by review
         var prod_str = render_products_list(products);
         var tmp_str = create_panel(id_str, header_str, prod_str);
 

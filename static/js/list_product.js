@@ -2,15 +2,18 @@
 // get the product list, and show
 constraints_list = null;
 
-
-
-function get_prod_cb(data){
-    if(data.status != 0){
-        alert(data.data);
-        return;
+function render_product_list(mode){
+    if(mode == "rating"){
+        prod_list = sort_product_by_review(prod_list);
+    }else if(mode == "pricelh"){
+        prod_list = sort_product_by_price_lh(prod_list);
+    }else if(mode == "pricehl"){
+        prod_list = sort_product_by_price_hl(prod_list);
+    }else{
+        console.log("unknow sort mode"+mode);
+        prod_list = sort_product_by_review(prod_list);
     }
-
-    var prod_list = data.data;
+    
     for(var i=0; i< 3;i++){
         var col_str = "";
         for(var j=0;j < prod_list.length;j++){
@@ -25,6 +28,15 @@ function get_prod_cb(data){
             tmp_str += "<div>"+gen_prod_desc(prod_list[j].metadata)+"</div>";
             tmp_str += "</a></div>";
 
+            // add the review information here    
+            var star = Math.round( prod_list[j].mean_review );
+            tmp_str += "<div>";
+            tmp_str += "<img src='static/imgs/"+star+"star.png' width='50'/>";
+            tmp_str += "("+prod_list[j].review_num+" reviews)";
+            tmp_str += "</div>";
+
+            tmp_str += "<div></div>";
+
             tmp_str += "Price: $"+get_min_price(prod_list[j]);
             tmp_str += "</div>";
             col_str += tmp_str;
@@ -34,6 +46,17 @@ function get_prod_cb(data){
         jQuery('#'+div_id).html(col_str);
     }
 
+}
+
+function get_prod_cb(data){
+    if(data.status != 0){
+        alert(data.data);
+        return;
+    }
+
+    prod_list = data.data;
+
+    render_product_list("rating");    
     // TODO , create the faceted data panel here
     create_faceted_panel(prod_list);
 }
@@ -154,11 +177,14 @@ function close_facet_tags(name){
     window.location.href= tmp_url;
 }
 
-
-
 ////////////
 // sort product part
 ////////////
 function sort_prod_by(tagname){
     // TODO, select option change
 }
+
+$('#sortbyselect').change(function(){ 
+    var value = $(this).val();
+    render_product_list(value);
+});

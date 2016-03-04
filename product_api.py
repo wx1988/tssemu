@@ -9,7 +9,7 @@ get all the sellers and price
 Given a specification,
 get all matching products
 """
-
+import numpy as np
 import os
 import json
 
@@ -17,6 +17,9 @@ from pymongo import MongoClient
 client = MongoClient('localhost', 27017)
 db = client.ram
 prod_col = db.products
+az_col = db.amazon
+newegg_col = db.newegg
+bb_col = db.bestbuy
 
 from builddb.crucial.get_compatmem_by_machine import get_cm_list_mp
 
@@ -36,7 +39,6 @@ def get_vote(vlist):
         if tdic[k] > tdic[bk]:
             bk = k
     return bk
-
 
 def get_match_prod(sys_info):
     # find memory by memory model
@@ -72,7 +74,7 @@ def get_match_prod(sys_info):
     else:
         # vote to get the right specification
         if not search_spec.has_key('metadata.freq'):
-            search_spec['metadata.freq'] = get_vote([mem['metadata']['freq'] for mem in mem_list_by_machine if mem['metadata'].has_key('freq') ] )    
+            search_spec['metadata.freq'] = get_vote([mem['metadata']['freq'] for mem in mem_list_by_machine if mem['metadata'].has_key('freq') ] )
         search_spec['metadata.type'] = get_vote([mem['metadata']['type'] for mem in mem_list_by_machine if mem['metadata'].has_key('type') ] )
         search_spec['metadata.reg'] = get_vote([mem['metadata']['reg'] for mem in mem_list_by_machine if mem['metadata'].has_key('reg') ] )
         search_spec['metadata.ecc'] = get_vote([mem['metadata']['ecc'] for mem in mem_list_by_machine if mem['metadata'].has_key('ecc') ])
@@ -95,6 +97,7 @@ def get_match_prod(sys_info):
     print len(spec_mem_list)
 
     # NOTE, return a bunch of information for next suggestion stage
+    spec_mem_list = fill_review(spec_mem_list)
     return spec_mem_list, search_spec
 
 def get_prod_by_spec(spec_dic):
@@ -119,14 +122,28 @@ def get_prod_by_spec(spec_dic):
         if not check_price(mem):
             continue
         new_res.append(mem)
+    new_res = fill_review(new_res)
     return new_res
 
-
-def get_review():
+def fill_review(prod_list):
     """
     TODO
     """
-    pass
+    source_col_list = [az_col ,newegg_col , bb_col]
+    for prod in prod_list:
+        modelname = prod['model']
+        rscore_list = []
+        for sc in source_col_list:
+            p = sc.find_one({"metadata.model":modelname})
+            if p and p.has_key('review'):
+                rscore_list.extend( p['review']['rscore_list'] )
+        prod['review_num'] = len(rscore_list)
+        if len(rscore_list) == 0:
+            prod['mean_review'] = 0
+        else:
+            prod['mean_review'] = np.mean(rscore_list)
+
+    return prod_list
 
 def test_get_match_prod():
     #sys_info = {u'mem_list': [{u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other ', u'detail': u'Synchronous', u'speed': 2133}], u'manufacturer': u' Dell Inc.', u'slots': 8, u'maximum_capacity': 256, u'productname': u' Precision Tower 5810'}
