@@ -14,12 +14,13 @@ urls=(
     # pages
     '/', 'index',
     '/view_product', 'view_product',
+    '/list_product2', 'list_product2',
     '/list_product', 'list_product',
     '/compare', 'compare_products', # compare two or three products
 
     # POST service
     '/suggest2', 'suggest2',
-    '/suggest', 'suggest',    
+    '/suggest', 'suggest2',
 
     # interactive cralwer
     '/getnextid', 'getnextid',
@@ -68,12 +69,15 @@ class index:
         render = web.template.render('templates/', base="base")
         return render.index()
 
+class list_product2:
+    def GET(self):
+        render = web.template.render('templates/', base="base")
+        return render.list_product2()
 
 class list_product:
     def GET(self):
         render = web.template.render('templates/', base="base")
         return render.list_product()
-
 
 class view_product:
     def GET(self):

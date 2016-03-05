@@ -103,7 +103,7 @@ function get_min_price_of_all(products){
     return cur_min_price;
 }
 
-function create_panel(id_str, header_str, content_str){
+function create_panel(id_str, header_str, content_str, plan){
     var t = `<div class="panel-group">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -126,6 +126,10 @@ function create_panel(id_str, header_str, content_str){
 
     var tmp_url = "/list_product?constraints=";
     tmp_url += encodeURIComponent( JSON.stringify(constraints));
+    if(plan != undefined){
+        tmp_url += "&plan="+plan;
+    }
+    tmp_url += "&sys_info="+urlParam("sys_info");
     var res = String.format(t, id_str, header_str, content_str, tmp_url);
     return res;
 }

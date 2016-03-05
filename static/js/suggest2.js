@@ -1,3 +1,12 @@
+sysinfo = null;
+
+function get_cur_cap(){
+    var size = 0;
+    for(var i=0;i < sysinfo.mem_list.length;i++){
+        size += sysinfo.mem_list[i].capacity / 1024;
+    }
+    return size;
+}
 
 function render_plans(plans){
 	// rendering different upgrading plans
@@ -16,7 +25,8 @@ function render_plans(plans){
 		header_str += "Per Stick Size: " + plans[i].per_stick_size+", ";
 		header_str += "Min Price: $" + get_min_price_of_all(plans[i].prod_list);
 		var prod_str = render_products_list(plans[i].prod_list);
-		var tmp_str = create_panel(id_str, header_str, prod_str);
+        var plan_str = plans[i].name + "_" + get_cur_cap();
+		var tmp_str = create_panel(id_str, header_str, prod_str, plan_str);
 		all_plan_str += tmp_str;
 	}
 	jQuery("#suggestions").html(all_plan_str);
@@ -42,8 +52,8 @@ function suggestion_render(data){
 
 function load_suggestion(){
     // get sys info from the URL
-    var sysinfo = get_sysinfo();
-    var data = {"sys_info": JSON.stringify(sysinfo)};
+    sysinfo = get_sysinfo();
+    var data = { "sys_info" : JSON.stringify(sysinfo)};
     jQuery.post(
         "http://rtds9.cse.tamu.edu:8080/suggest2",
         data,

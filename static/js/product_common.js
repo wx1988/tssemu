@@ -1,4 +1,6 @@
 function get_prod_img(prod){
+    if(prod.metadata.imgs == undefined)
+        return '/static/imgs/no_image_available.png';
     if(prod.metadata.imgs.length == 0)
         return '/static/imgs/no_image_available.png';
     return prod.metadata.imgs[0];
@@ -40,6 +42,32 @@ function render_memory_str(mem_metadata){
     tmp_str += "Unit price ($"+mem_metadata.price+")";
     return tmp_str;
 }
+
+function render_product_grid(prod){
+    //var tmp_str = "<div style='height:200px;'>";
+    var tmp_str = "<div style='height:350px;'>";
+
+    //tmp_str += "<div><a href='/view_product?id="+prod_list[j].source+"_"+prod_list[j].id+"'>";
+    tmp_str += "<div><a href='#'>";
+    var img_url = get_prod_img(prod);
+    tmp_str += "<div><img src='"+img_url+"' width='250px' /></div>";
+    tmp_str += "<div>"+gen_prod_desc(prod.metadata)+"</div>";
+    tmp_str += "</a></div>";
+
+    // add the review information here    
+    var star = Math.round( prod.mean_review );
+    tmp_str += "<div>";
+    tmp_str += "<img src='static/imgs/"+star+"star.png' width='50'/>";
+    tmp_str += "("+prod.review_num+" reviews)";
+    tmp_str += "</div>";
+
+    tmp_str += "<div></div>";
+
+    tmp_str += "Price: $"+get_min_price(prod);
+    tmp_str += "</div>";
+    return tmp_str;
+}
+
 
 function gen_prod_desc(mem_metadata){
     // the metadata
