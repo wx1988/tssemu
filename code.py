@@ -29,6 +29,7 @@ urls=(
     # API
     '/search_product', 'search_product',
     '/prod_info', 'prod_info',
+    '/get_faceted_info', 'get_faceted_info'
     )
 
 ############
@@ -171,6 +172,13 @@ class search_product:
             'status':0,
             'data':prod_list})
 
+class get_faceted_info:
+    def GET(self):
+        from faceted import get_whole_faceted
+        faceted_info = get_whole_faceted()
+        return json.dumps({
+            'status':0,
+            'data':faceted_info })
 
 if __name__ == "__main__":
     app = web.application(urls, globals())

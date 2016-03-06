@@ -1,6 +1,7 @@
 // get the product list, and show
 constraints_list = null;
 cur_plan = null;
+prod_list = null;
 
 function render_plan(plan_str){
     function render_current_memory(){
@@ -12,7 +13,7 @@ function render_plan(plan_str){
         return tmp_str;
     }
     
-    var html_str = "";
+    var html_str = "Current Plan: ";
     if(plan_str[0] == 'k'){
         html_str += "Keep Old Memory ("+ render_current_memory() +")";
     }
@@ -22,7 +23,7 @@ function render_plan(plan_str){
     var ws = plan_str.split('_')
     html_str += ", Target Size: "+ws[1]+"G";
     html_str += ", Per Stick Size: "+ws[2]+"G";
-    html_str = "<h3>" + html_str+"</h3>";
+    html_str = "<h4>" + html_str+"</h4>";
     jQuery("#plan").html(html_str);
 }
 
@@ -61,7 +62,7 @@ function get_prod_cb(data){
     prod_list = data.data;
     render_product_list("rating");    
     // TODO , create the faceted data panel here
-    create_faceted_panel(prod_list);
+    //create_faceted_panel(prod_list);
 }
 
 window.onload = function(){
@@ -88,7 +89,29 @@ window.onload = function(){
 ////////////
 // faceted data
 ////////////
-function create_faceted_panel(products){
+faceted_info = null;
+// global variabel of the faceted info
+function whole_faceted_info_cb(data){    
+    if(data.status != 0){
+        alert(data.data);
+    }
+
+    // create_faceted_panel
+    faceted_info = data.data;
+    create_faceted_panel();
+
+}
+
+function get_whole_faceted_info(){
+    jQuery.post(
+        "/get_faceted_info", 
+        {},
+        whole_faceted_info_cb,
+        "json");
+}
+
+function create_faceted_panel(){
+    var products = prod_list;
     var t=`<div class="panel-heading">
             <h4 class="panel-title">
                 <a data-toggle="collapse" href="#{2}">{0}</a>
@@ -132,6 +155,10 @@ function create_faceted_panel(products){
 
 }
 
+
+///////////////
+//// feed back on selected faceted data
+///////////////
 function rendering_faceted_tags(constraints){
     var t=`<li>
         <span class="label label-default">
