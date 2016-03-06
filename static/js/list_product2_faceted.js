@@ -21,7 +21,6 @@ function whole_faceted_info_cb(data){
     // create_faceted_panel
     faceted_info = data.data;
     create_faceted_panel();
-
 }
 
 function get_whole_faceted_info(){
@@ -55,6 +54,7 @@ function create_faceted_panel(){
     keylist = simple_key_list;
     shownamelist = simple_showname_list;
 
+    var id_list = [];
     var panels_str = "";
     for(var i=0;i < keylist.length;i++){
         var v2count = {}
@@ -70,16 +70,19 @@ function create_faceted_panel(){
         //console.log(v2count);
         for(v in v2count){
             var show_str = v +"("+v2count[v]+")";
-            var tmp = "<input type='checkbox' name='"+keylist[i]+"'";            
-            // TODO, if already in the constraints
-            // show as checked. 
+            var id_str = keylist[i]+"_"+v;
+            var tmp = "<input id='"+id_str+"' type='checkbox' name='"+keylist[i]+"'";            
+            // if already in the constraints, show as checked. 
             if( constraints["metadata."+keylist[i]] != undefined){
                 if( v.toString() == constraints["metadata."+keylist[i]].toString() )
                     tmp += " checked ";
             }
-            tmp += " value='"+show_str+"' >"+show_str+"<br/>";
+            // add on click function
+            //tmp+= " onchange='checkbox_val_changed();' "
+            tmp += " value='"+v+"' >"+show_str+"<br/>";
 
             checkbox_str += tmp;
+            id_list[id_list.length] = id_str;
         }
         var panel_str = String.format(
             t, shownamelist[i],
@@ -98,6 +101,13 @@ function create_faceted_panel(){
     }
 
     jQuery("#faceted_panel").html(panels_str);
+
+    // add callback here?
+    for(var i = 0;i < id_list.length;i++){
+        id_str = id_list[i];
+        jQuery("#"+id_str).change(checkbox_val_changed);
+    }
+    
 }
 
 
@@ -154,6 +164,36 @@ function close_facet_tags(name){
         tmp_constraints[k] = constraints[k];
     }
 
+    update_url(tmp_constraints);
+}
+
+///////////////
+/// response on new faceted data selected
+///////////////
+function checkbox_val_changed(){
+    console.log(this);
+    console.log(this.checked);
+    
+    var meta_name = $("#"+this.id).attr('name');
+    var meta_val = $("#"+this.id).attr('value');
+
+    if(this.checked) {
+        // add this new constraints    
+        constraints["metadata."+meta_name] = meta_val;
+
+    }else{
+        // remove this constraints
+        delete constraints["metadata."+meta_name];
+    }
+
+    console.log(constraints);
+    update_url(constraints);
+}
+
+////////////
+/// common 
+////////////
+function update_url(tmp_constraints){
     //plan, sys)_info
     plan_value = urlParam('plan');
     sys_info = urlParam('sys_info');
@@ -164,7 +204,3 @@ function close_facet_tags(name){
 
     window.location.href= tmp_url;
 }
-
-///////////////
-/// response on new faceted data selected
-///////////////

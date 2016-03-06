@@ -82,6 +82,7 @@ function render_product_list(mode){
         var div_id = "prod_list_col_"+(i+1);
         jQuery('#'+div_id).html(col_str);
     }
+    jQuery("#total_number").html(prod_list.length+" items");
 }
 
 function get_prod_cb(data){

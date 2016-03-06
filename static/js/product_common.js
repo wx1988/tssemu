@@ -49,14 +49,17 @@ function render_product_grid(prod){
 
     //tmp_str += "<div><a href='/view_product?id="+prod_list[j].source+"_"+prod_list[j].id+"'>";
     tmp_str += "<div><a href='#'>";
+    // image of the same height
     var img_url = get_prod_img(prod);
-    tmp_str += "<div><img src='"+img_url+"' width='250px' /></div>";
+    tmp_str += "<div style='height:250px'><img src='"+img_url+"' width='250px' /></div>";
+
     tmp_str += "<div>"+gen_prod_desc(prod.metadata)+"</div>";
     tmp_str += "</a></div>";
 
     // add the review information here    
     var star = Math.round( prod.mean_review );
     tmp_str += "<div>";
+
     tmp_str += "<img src='static/imgs/"+star+"star.png' width='50'/>";
     tmp_str += "("+prod.review_num+" reviews)";
     tmp_str += "</div>";
