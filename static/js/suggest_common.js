@@ -88,6 +88,7 @@ function render_products_list(products){
 
         html_str += "Buy "+products[i].buy_number+" unit"+', ';
         html_str += "Min price: $ "+products[i].min_price+" ";
+        html_str += render_prod_source(products[i]); 
         html_str += "</li>";
     }
     html_str += "</ul>";
@@ -107,18 +108,30 @@ function create_panel(id_str, header_str, content_str, plan){
     var t = `<div class="panel-group">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="row">
-                <div class="col-sm-10">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" href="#{0}">{1}</a>
-                    </h4>
-                </div>
-                <div class="col-sm-2">
-                    <a href='{3}'> View More >> </a>
-                </div>
-            </div>
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#{0}">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            {1}
+                        </div>
+                        <div class="col-sm-1">
+                            <img src="/static/imgs/down_triangle.png" width='20' />                    
+                        </div>
+                    </div>
+                </a>
+            </h4>
+            
             <div id="{0}" class="panel-collapse collapse">
-                <div class="panel-body">{2}</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-10">
+                        </div>
+                        <div class="col-sm-2">
+                            <a href='{3}' target="_blank"> View More >> </a>
+                        </div>
+                    </div>
+                {2}
+                </div>
             </div>
         </div>
     </div>

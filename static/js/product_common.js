@@ -43,6 +43,27 @@ function render_memory_str(mem_metadata){
     return tmp_str;
 }
 
+function render_prod_source(prod){
+    // sort the websites based on price
+    var template = "<a href='{0}' target='_blank'><img src='{1}' height='20' /></a>";
+    var source_list = prod.websites;
+    source_list.sort(function(a,b){return a.price-b.price;});
+    var html_str = "";
+    var website2logo = {
+        'crucial': "/static/imgs/sourcelogo/crucial_micron.jpg", 
+        'amazon': "/static/imgs/sourcelogo/amazon.png", 
+        'newegg': "/static/imgs/sourcelogo/newegg.png", 
+        "bestbuy": "/static/imgs/sourcelogo/bestbuy.jpg"
+    };
+    for(var i = 0;i < source_list.length;i++){
+        html_str += String.format(
+            template, 
+            source_list[i].url, 
+            website2logo[source_list[i].website] );
+    }
+    return html_str;
+}
+
 function render_product_grid(prod){
     //var tmp_str = "<div style='height:200px;'>";
     var tmp_str = "<div style='height:350px;'>";
@@ -58,15 +79,20 @@ function render_product_grid(prod){
 
     // add the review information here    
     var star = Math.round( prod.mean_review );
-    tmp_str += "<div>";
 
+    // basic information part
+    tmp_str += "<div>";
     tmp_str += "<img src='static/imgs/"+star+"star.png' width='50'/>";
     tmp_str += "("+prod.review_num+" reviews)";
     tmp_str += "</div>";
 
-    tmp_str += "<div></div>";
-
+    // price part
+    tmp_str += "<div>";
     tmp_str += "Price: $"+get_min_price(prod);
+    // add different source of information, 14 px
+    tmp_str += render_prod_source(prod);
+    tmp_str += "</div>";
+
     tmp_str += "</div>";
     return tmp_str;
 }

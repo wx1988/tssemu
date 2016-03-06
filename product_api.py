@@ -20,6 +20,7 @@ prod_col = db.products
 az_col = db.amazon
 newegg_col = db.newegg
 bb_col = db.bestbuy
+cru_col = db.crucial_mem
 
 from builddb.crucial.get_compatmem_by_machine import get_cm_list_mp
 
@@ -97,7 +98,7 @@ def get_match_prod(sys_info):
     print len(spec_mem_list)
 
     # NOTE, return a bunch of information for next suggestion stage
-    spec_mem_list = fill_review(spec_mem_list)
+    spec_mem_list = post_process(spec_mem_list)
     return spec_mem_list, search_spec
 
 def get_prod_by_spec(spec_dic):
@@ -122,12 +123,34 @@ def get_prod_by_spec(spec_dic):
         if not check_price(mem):
             continue
         new_res.append(mem)
-    new_res = fill_review(new_res)
+    new_res = post_process(new_res)
     return new_res
+
+def post_process(prod_list):
+    prod_list = fill_review(prod_list)
+    prod_list = fill_prod_url(prod_list)
+    return prod_list
+
+def fill_prod_url(prod_list):
+    for i,prod in enumerate(prod_list):
+        for j, web_info in enumerate(prod['websites']):
+            print web_info
+            if web_info['website'] == "newegg":
+                prod_list[i]['websites'][j]['url'] = "http://www.newegg.com/Product/Product.aspx?Item="+web_info['id']
+            if web_info['website'] == "amazon":
+                prod_list[i]['websites'][j]["url"] = "http://amazon.com/dp/"+web_info['id']
+            if web_info['website'] == "bestbuy":
+                prod_list[i]['websites'][j]["url"] = "http://www.bestbuy.com/site/t/%s.p?skuId=%s"%(str(web_info['id']), str(web_info['id']))
+            if web_info['website'] == "crucial":
+                # find the memory in curcial database based on model
+                c = cru_col.find_one({'model':prod['model']})
+                if c:
+                    prod_list[i]['websites'][j]["url"] = c['url']
+    return prod_list                
 
 def fill_review(prod_list):
     """
-    TODO
+    Summary of review here
     """
     source_col_list = [az_col ,newegg_col , bb_col]
     for prod in prod_list:
@@ -142,8 +165,9 @@ def fill_review(prod_list):
             prod['mean_review'] = 0
         else:
             prod['mean_review'] = np.mean(rscore_list)
-
     return prod_list
+
+
 
 def test_get_match_prod():
     #sys_info = {u'mem_list': [{u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other', u'detail': u'Synchronous', u'speed': 2133}, {u'capacity': 4096, u'model': u'HMA451R7MFR8N-TF ', u'type': u'Other ', u'detail': u'Synchronous', u'speed': 2133}], u'manufacturer': u' Dell Inc.', u'slots': 8, u'maximum_capacity': 256, u'productname': u' Precision Tower 5810'}
