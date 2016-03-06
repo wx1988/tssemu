@@ -180,6 +180,9 @@ class get_faceted_info:
             'status':0,
             'data':faceted_info })
 
+    def POST(self):
+        return self.GET()
+
 if __name__ == "__main__":
     app = web.application(urls, globals())
     app.run()

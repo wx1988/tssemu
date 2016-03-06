@@ -124,12 +124,24 @@ function create_panel(id_str, header_str, content_str, plan){
     </div>
 </div>`;
 
-    var tmp_url = "/list_product?constraints=";
-    tmp_url += encodeURIComponent( JSON.stringify(constraints));
+    var tmp_url = "/list_product2?";
+    
+    // part 1
+    tmp_url += "sys_info="+urlParam("sys_info");
+
+    // part 2
+    var tmp_constraints = constraints;
     if(plan != undefined){
         tmp_url += "&plan="+plan;
+        // get the perstick capacity here
+        var ws = plan.split('_')
+        tmp_constraints['metadata.capacity'] = parseInt(ws[2]);    
     }
-    tmp_url += "&sys_info="+urlParam("sys_info");
+
+    // part 3
+    tmp_url += "&constraints=";
+    tmp_url += encodeURIComponent( JSON.stringify(tmp_constraints));    
+    
     var res = String.format(t, id_str, header_str, content_str, tmp_url);
     return res;
 }
