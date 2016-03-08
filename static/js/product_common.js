@@ -84,7 +84,7 @@ function render_product_grid2(prod, plan_str){
     // basic information part
     tmp_str += "<div>";
     tmp_str += "<img src='static/imgs/"+star+"star.png' width='50'/>";
-    tmp_str += "("+prod.review_num+" reviews)";
+    tmp_str += "("+prod.mean_review.toFixed(2)+", "+prod.review_num+" reviews)";
     tmp_str += "</div>";
 
     // price part
@@ -198,6 +198,7 @@ function sort_product_by_price_hl(prod_list){
 }
 
 function sort_product_by_review2(prod_list){
+    // TODO, the average review is not detailed enough
     var tmp_prod_list = prod_list;
     tmp_prod_list.sort(function(a,b){
         var part1 = (b.mean_review - a.mean_review)*1000000;

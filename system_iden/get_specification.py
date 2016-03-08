@@ -22,13 +22,19 @@ def execute_cmd(cmd):
 
 def get_memory_str():
     """
-    TODO, add two example here
-
     """
     sys_info = {}
-
+    dmidecode_path = ""
+    if os.path.isfile("./dmidecode.exe"):
+        dmidecode_path = "./dmidecode.exe"
+    elif os.path.isfile("./dist/dmidecode.exe"):
+        dmidecode_path = "./dist/dmidecode.exe"
+    else:
+        raise Exception("dmidecode not found")
+    print "detected dmidecode", dmidecode_path
+        
     # machine model
-    dmidecode_cmd = ["./dmidecode", "-t", "system"]
+    dmidecode_cmd = [dmidecode_path, "-t", "system"]
     output = execute_cmd(dmidecode_cmd)
     lines = [line.strip() for line in output.split("\n")]
     for line in lines:
@@ -38,7 +44,7 @@ def get_memory_str():
             sys_info['productname'] = line[line.index(":")+1:]
 
     # some system info
-    dmidecode_cmd = ["./dmidecode", "-t", "16"]
+    dmidecode_cmd = [dmidecode_path, "-t", "16"]
     output = execute_cmd( dmidecode_cmd )
     lines = [line.strip() for line in output.split("\n")]
     for line in lines:
@@ -50,7 +56,7 @@ def get_memory_str():
             sys_info['slots'] = int( ws[1])
 
     # get existing memories
-    dmidecode_cmd = ["./dmidecode", "-t", "17"]
+    dmidecode_cmd = [dmidecode_path, "-t", "17"]
     output = execute_cmd( dmidecode_cmd )
     lines = [line.strip() for line in output.split("\n")]
     #print output
@@ -58,25 +64,31 @@ def get_memory_str():
     # 1. size
     size_re = re.compile("Size: (\d+) MB")
     # 2. type
-    type_re = re.compile("Type: ([\w ]+)")
+    type_re = re.compile("Type: ([\s\S]*?)\n")
     typed_re = re.compile("Type Detail: ([\w ]+)")
     # 3. speed
     speed_re = re.compile("Speed: (\d+) MHz")
     # 4. Part number
-    pn_re = re.compile("Part Number: ([\w -/]+)")
+    pn_re = re.compile("Part Number: ([\s|\S]*?)\n")
 
     sys_info['mem_list'] = []
     mem_list = output.split('\n\n')
     for mem in mem_list:
         mem = mem.strip()
         #print '0', mem[0]
+        if mem == "":
+            continue
         if mem.startswith("Handle"):
-            #print 'Mem', mem
+            print 'Mem', mem
             try:
                 size_str = size_re.search( mem ).group(1)
+                print 'size'
                 type_str = type_re.search( mem ).group(1)
+                print 'type'
                 typed_str = typed_re.search( mem ).group(1)
+                print 'speed'
                 speed_str = speed_re.search( mem ).group(1)
+                print 'pn'
                 pn_str = pn_re.search( mem ).group(1)
                 mem_info = {
                         'capacity':int(size_str),
@@ -88,6 +100,7 @@ def get_memory_str():
                 sys_info['mem_list'].append( mem_info )
             except Exception as e:
                 # empty slots
+                print e
                 pass
     return sys_info
 
@@ -95,15 +108,14 @@ if __name__ == "__main__":
     sys_info =  get_memory_str()
     print sys_info
     #print sys_info
-    # TODO, design the sever part that receive such things
+
     url_tpl = "http://rtds9.cse.tamu.edu:8080/suggest?sys_info=%s"
     json_str = json.dumps(sys_info)
-    #json_str = json_str.replace(' ', '+')
 
     the_url = url_tpl%(urllib.quote_plus(json.dumps(sys_info)))
-    #the_url = url_tpl%(json_str)
+
     print the_url
     #the_url.replace("")
-    os.system("explorer %s"%(the_url))
+    #os.system("explorer %s"%(the_url))
 
     webbrowser.open(the_url)
