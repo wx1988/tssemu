@@ -13,6 +13,7 @@ window.onload = function(){
 
     // rendering the current plan.    
     var plan_str = decodeURIComponent(urlParam('plan'));
+    cur_plan = plan_str;
     render_plan(plan_str);
 
     // get all product and render them
@@ -60,11 +61,11 @@ function render_plan(plan_str){
 /////////////
 function render_product_list(mode){
     if(mode == "rating"){
-        prod_list = sort_product_by_review(prod_list);
+        prod_list = sort_product_by_review2(prod_list);
     }else if(mode == "pricelh"){
-        prod_list = sort_product_by_price_lh(prod_list);
+        prod_list = sort_product_by_price_lh2(prod_list);
     }else if(mode == "pricehl"){
-        prod_list = sort_product_by_price_hl(prod_list);
+        prod_list = sort_product_by_price_hl2(prod_list);
     }else{
         console.log("unknow sort mode"+mode);
         prod_list = sort_product_by_review(prod_list);
@@ -76,7 +77,7 @@ function render_product_list(mode){
             if( j%3!=i) 
                 continue;
 
-            tmp_str = render_product_grid(prod_list[j]);
+            tmp_str = render_product_grid2(prod_list[j], cur_plan);
             col_str += tmp_str;
         }
         var div_id = "prod_list_col_"+(i+1);
@@ -91,7 +92,29 @@ function get_prod_cb(data){
         return;
     }
 
+    // current plan
+    var plan_str = decodeURIComponent(urlParam('plan'));
+    var ws = plan_str.split('_');
+    var target_cap = parseInt(ws[1]);
+
+    // current system
+    var cur_cap = 0;
+    sysinfo = get_sysinfo();
+    for(var i=0;i < sysinfo.mem_list.length;i++){
+        cur_cap += (sysinfo.mem_list[i].capacity / 1024);
+    }
+    
+    var remain_cap = target_cap - cur_cap;
+
     prod_list = data.data;
+    // multiply by the unit
+    for(var i = 0;i < prod_list.length;i++){
+        var prod = prod_list[i];
+        var per_unit_cap = prod.metadata.capacity * prod.metadata.number;
+        var unit_num = Math.ceil(remain_cap/per_unit_cap);
+        prod_list[i].metadata.totalprice = get_min_price(prod_list[i])*unit_num;
+    }
+
     render_product_list("rating");    
     // TODO , create the faceted data panel here
     //create_faceted_panel(prod_list);
